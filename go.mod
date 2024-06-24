@@ -12,6 +12,7 @@ require (
 	github.com/ilyakaznacheev/cleanenv v1.5.0
 	github.com/jmoiron/sqlx v1.4.0
 	github.com/lib/pq v1.10.9
+	github.com/subosito/gotenv v1.6.0
 	golang.org/x/time v0.5.0
 )
 
