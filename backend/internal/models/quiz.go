@@ -15,6 +15,8 @@ type Quiz struct {
 	HasShuffle       bool          `json:"hasShuffle" db:"has_shuffle"`     // перемешивать вопросы
 	HasSkippable     bool          `json:"hasSkippable" db:"has_skippable"` // можно пропускать вопросы
 	ShowList         bool          `json:"showList" db:"show_list"`         // показывать все вопросы, а не по одному
+	ShowAnswers      bool          `json:"showAnswers" db:"show_answers"`   // показывать правильные ответы после теста
+	ShowResults      bool          `json:"showResults" db:"show_results"`   // показывать предыдущие результаты (вопросы с ответами, а не общие результаты)
 	Time             time.Duration `json:"time" db:"time"`                  //? время для выполнения теста
 	AuthorID         string        `json:"authorId" db:"author_id"`
 }
@@ -26,8 +28,8 @@ type GetQuizDTO struct {
 type QuizDTO struct {
 	ID               string        `json:"id"`
 	Title            string        `json:"title" binding:"required,min=3,max=255"`
-	Description      string        `json:"description,omitempty"`
-	Image            string        `json:"image,omitempty"`
+	Description      string        `json:"description"`
+	Image            string        `json:"image"`
 	NumberOfAttempts uint8         `json:"numberOfAttempts" binding:"min=0,max=250"`
 	CategoryID       string        `json:"categoryId"`
 	StartTime        int64         `json:"startTime"`

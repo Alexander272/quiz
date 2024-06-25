@@ -5,5 +5,6 @@ const (
 	MenuItemTable = "menu_item"
 	MenuTable     = "menu"
 
-	QuizTable = "quiz"
+	QuizTable     = "quiz"
+	QuestionTable = "question"
 )

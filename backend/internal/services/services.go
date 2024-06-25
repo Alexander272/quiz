@@ -15,6 +15,7 @@ type Services struct {
 	Permission
 
 	Quiz
+	Question
 }
 
 type Deps struct {
@@ -35,6 +36,7 @@ func NewServices(deps Deps) *Services {
 	permission := NewPermissionService("configs/privacy.conf", menu, role)
 
 	quiz := NewQuizService(deps.Repos.Quiz)
+	question := NewQuestionService(deps.Repos.Question)
 
 	return &Services{
 		MenuItem:   menuItem,
@@ -43,6 +45,7 @@ func NewServices(deps Deps) *Services {
 		Session:    session,
 		Permission: permission,
 
-		Quiz: quiz,
+		Quiz:     quiz,
+		Question: question,
 	}
 }

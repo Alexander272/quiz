@@ -18,6 +18,9 @@ type Menu interface {
 type Quiz interface {
 	postgres.Quiz
 }
+type Question interface {
+	postgres.Question
+}
 
 type Repository struct {
 	Role
@@ -25,6 +28,7 @@ type Repository struct {
 	Menu
 
 	Quiz
+	Question
 }
 
 func NewRepository(db *sqlx.DB) *Repository {
@@ -33,6 +37,7 @@ func NewRepository(db *sqlx.DB) *Repository {
 		MenuItem: postgres.NewMenuItemRepo(db),
 		Menu:     postgres.NewMenuRepo(db),
 
-		Quiz: postgres.NewQuizRepo(db),
+		Quiz:     postgres.NewQuizRepo(db),
+		Question: postgres.NewQuestionRepo(db),
 	}
 }

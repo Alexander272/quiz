@@ -30,7 +30,7 @@ type Quiz interface {
 
 func (r *QuizRepo) GetById(ctx context.Context, req *models.GetQuizDTO) (*models.Quiz, error) {
 	query := fmt.Sprintf(`SELECT id, title, description, image, is_drawing, number_of_attempts, category_id, start_time, end_time, has_shuffle, has_skippable,
-		show_list, time, author_id FROM %s WHERE id=$1`,
+		show_list, show_answers, show_results, time, author_id FROM %s WHERE id=$1`,
 		QuizTable,
 	)
 
@@ -46,8 +46,8 @@ func (r *QuizRepo) GetById(ctx context.Context, req *models.GetQuizDTO) (*models
 
 func (r *QuizRepo) Create(ctx context.Context, dto *models.QuizDTO) (string, error) {
 	query := fmt.Sprintf(`INSERT INTO %s (id, title, description, image, is_drawing, number_of_attempts, category_id, start_time, end_time, has_shuffle, 
-		has_skippable, show_list, time, author_id) VALUES (:id, :title, :description, :image, :is_drawing, :number_of_attempts, :category_id, :start_time, 
-		:end_time, :has_shuffle, :has_skippable, :show_list, :time, :author_id)`,
+		has_skippable, show_list, show_answers, show_results, time, author_id) VALUES (:id, :title, :description, :image, :is_drawing, :number_of_attempts,
+		:category_id, :start_time, :end_time, :has_shuffle, :has_skippable, :show_list, :show_answers, :show_results, :time, :author_id)`,
 		QuizTable,
 	)
 	dto.ID = uuid.New().String()
@@ -61,7 +61,7 @@ func (r *QuizRepo) Create(ctx context.Context, dto *models.QuizDTO) (string, err
 func (r *QuizRepo) Update(ctx context.Context, dto *models.QuizDTO) error {
 	query := fmt.Sprintf(`UPDATE %s SET title=:title, description=:description, image=:image, is_drawing=:is_drawing, number_of_attempts=:number_of_attempts,
 		category_id=:category_id, start_time=:start_time, end_time=:end_time, has_shuffle=:has_shuffle, has_skippable=:has_skippable, show_list=:show_list,
-		time=:time, author_id=:author_id WHERE id=:id`,
+		show_answers=:show_answers, show_results=:show_results, time=:time, author_id=:author_id WHERE id=:id`,
 		QuizTable,
 	)
 
