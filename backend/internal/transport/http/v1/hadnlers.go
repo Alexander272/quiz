@@ -4,6 +4,7 @@ import (
 	"github.com/Alexander272/quiz/backend/internal/config"
 	"github.com/Alexander272/quiz/backend/internal/services"
 	"github.com/Alexander272/quiz/backend/internal/transport/http/middleware"
+	"github.com/Alexander272/quiz/backend/internal/transport/http/v1/answer"
 	"github.com/Alexander272/quiz/backend/internal/transport/http/v1/auth"
 	"github.com/Alexander272/quiz/backend/internal/transport/http/v1/question"
 	"github.com/Alexander272/quiz/backend/internal/transport/http/v1/quiz"
@@ -41,4 +42,5 @@ func Register(api *gin.RouterGroup, deps *Deps) {
 	auth.Register(v1, &auth.Deps{Service: deps.Services.Session, Auth: deps.Conf.Auth})
 	quiz.Register(v1, deps.Services.Quiz, deps.Middleware)
 	question.Register(v1, deps.Services.Question, deps.Middleware)
+	answer.Register(v1, deps.Services.Answer, deps.Middleware)
 }

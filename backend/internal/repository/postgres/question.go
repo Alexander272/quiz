@@ -30,7 +30,7 @@ type Question interface {
 }
 
 func (r *QuestionRepo) Get(ctx context.Context, req *models.GetQuestionsDTO) ([]*models.Question, error) {
-	query := fmt.Sprintf(`SELECT id, number, quiz_id, text, description, image, has_shuffle, level, points, group_id, time
+	query := fmt.Sprintf(`SELECT id, number, quiz_id, text, description, image, has_shuffle, level, points, time
 		FROM %s WHERE quiz_id=$1 ORDER BY number`,
 		QuestionTable,
 	)
@@ -43,7 +43,7 @@ func (r *QuestionRepo) Get(ctx context.Context, req *models.GetQuestionsDTO) ([]
 }
 
 func (r *QuestionRepo) GetById(ctx context.Context, req *models.GetQuestionDTO) (*models.Question, error) {
-	query := fmt.Sprintf(`SELECT id, number, quiz_id, text, description, image, has_shuffle, level, points, group_id, time
+	query := fmt.Sprintf(`SELECT id, number, quiz_id, text, description, image, has_shuffle, level, points, time
 		FROM %s WHERE id=$1`,
 		QuestionTable,
 	)
@@ -59,8 +59,8 @@ func (r *QuestionRepo) GetById(ctx context.Context, req *models.GetQuestionDTO) 
 }
 
 func (r *QuestionRepo) Create(ctx context.Context, dto *models.QuestionDTO) (string, error) {
-	query := fmt.Sprintf(`INSERT INTO %s (id, number, quiz_id, text, description, image, has_shuffle, level, points, group_id, time) 
-		VALUES (:id, :number, :quiz_id, :text, :description, :image, :has_shuffle, :level, :points, :group_id, :time)`,
+	query := fmt.Sprintf(`INSERT INTO %s (id, number, quiz_id, text, description, image, has_shuffle, level, points, time) 
+		VALUES (:id, :number, :quiz_id, :text, :description, :image, :has_shuffle, :level, :points, :time)`,
 		QuestionTable,
 	)
 	dto.ID = uuid.New().String()
@@ -73,7 +73,7 @@ func (r *QuestionRepo) Create(ctx context.Context, dto *models.QuestionDTO) (str
 
 func (r *QuestionRepo) Update(ctx context.Context, dto *models.QuestionDTO) error {
 	query := fmt.Sprintf(`UPDATE %s SET number=:number, text=:text, description=:description, image=:image, has_shuffle=:has_shuffle, level=:level, 
-		points=:points, group_id=:group_id WHERE id=:id`,
+		points=:points WHERE id=:id`,
 		QuestionTable,
 	)
 

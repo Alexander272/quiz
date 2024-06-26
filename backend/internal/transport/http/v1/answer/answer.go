@@ -1,7 +1,6 @@
-package question
+package answer
 
 import (
-	"errors"
 	"net/http"
 
 	"github.com/Alexander272/quiz/backend/internal/models"
@@ -14,42 +13,38 @@ import (
 )
 
 type Handler struct {
-	service services.Question
+	service services.Answer
 }
 
-func NewHandler(service services.Question) *Handler {
+func NewHandler(service services.Answer) *Handler {
 	return &Handler{
 		service: service,
 	}
 }
 
-func Register(api *gin.RouterGroup, service services.Question, middleware *middleware.Middleware) {
+func Register(api *gin.RouterGroup, service services.Answer, middleware *middleware.Middleware) {
 	handler := NewHandler(service)
 
-	questions := api.Group("/questions")
+	answers := api.Group("/answers")
 	{
-		questions.GET("", handler.get)
-		questions.GET("/:id", handler.getById)
-		questions.POST("", handler.create)
-		questions.PUT("/:id", handler.update)
-		questions.DELETE("/:id", handler.delete)
+		answers.GET("/quiz/:id", handler.getByQuiz)
+		answers.GET("/:questionId", handler.getByQuestion)
+		answers.POST("", handler.create)
+		answers.POST("/several", handler.createSeveral)
+		answers.PUT("/:id", handler.update)
+		answers.DELETE("/:id", handler.delete)
 	}
 }
 
-func (h *Handler) get(c *gin.Context) {
-	quizID := c.Query("quiz")
-	if quizID == "" {
+func (h *Handler) getByQuiz(c *gin.Context) {
+	quizId := c.Param("id")
+	if quizId == "" {
 		response.NewErrorResponse(c, http.StatusBadRequest, "empty param", "id не задан")
 		return
 	}
-	hasShuffle := c.Query("shuffle")
+	req := &models.GetAnswersDTO{QuizID: quizId, HasCorrect: true}
 
-	req := &models.GetQuestionsDTO{
-		QuizID:     quizID,
-		HasShuffle: hasShuffle != "false",
-	}
-
-	data, err := h.service.Get(c, req)
+	data, err := h.service.GetByQuiz(c, req)
 	if err != nil {
 		response.NewErrorResponse(c, http.StatusInternalServerError, err.Error(), "Произошла ошибка: "+err.Error())
 		error_bot.Send(c, err.Error(), req)
@@ -58,28 +53,25 @@ func (h *Handler) get(c *gin.Context) {
 	c.JSON(http.StatusOK, response.DataResponse{Data: data, Total: len(data)})
 }
 
-func (h *Handler) getById(c *gin.Context) {
-	id := c.Param("id")
-	if id == "" {
+func (h *Handler) getByQuestion(c *gin.Context) {
+	questionId := c.Param("questionId")
+	if questionId == "" {
 		response.NewErrorResponse(c, http.StatusBadRequest, "empty param", "id не задан")
 		return
 	}
+	req := &models.GetAnswersDTO{QuestionID: questionId, HasCorrect: true}
 
-	data, err := h.service.GetById(c, &models.GetQuestionDTO{ID: id})
+	data, err := h.service.GetByQuestion(c, req)
 	if err != nil {
-		if errors.Is(err, models.ErrNoRows) {
-			response.NewErrorResponse(c, http.StatusNotFound, err.Error(), err.Error())
-			return
-		}
 		response.NewErrorResponse(c, http.StatusInternalServerError, err.Error(), "Произошла ошибка: "+err.Error())
-		error_bot.Send(c, err.Error(), id)
+		error_bot.Send(c, err.Error(), req)
 		return
 	}
-	c.JSON(http.StatusOK, response.DataResponse{Data: data})
+	c.JSON(http.StatusOK, response.DataResponse{Data: data.List, Total: len(data.List)})
 }
 
 func (h *Handler) create(c *gin.Context) {
-	dto := &models.QuestionDTO{}
+	dto := &models.AnswerDTO{}
 	if err := c.BindJSON(dto); err != nil {
 		response.NewErrorResponse(c, http.StatusBadRequest, err.Error(), "Отправлены некорректные данные")
 		return
@@ -91,9 +83,26 @@ func (h *Handler) create(c *gin.Context) {
 		error_bot.Send(c, err.Error(), dto)
 		return
 	}
-	logger.Info("Добавлен вопрос", logger.StringAttr("text", dto.Text), logger.StringAttr("quiz_id", dto.QuizID))
+	logger.Info("Добавлен ответ", logger.StringAttr("text", dto.Text), logger.StringAttr("question_id", dto.QuestionID))
 
-	c.JSON(http.StatusCreated, response.IdResponse{Id: id, Message: "Вопрос добавлен"})
+	c.JSON(http.StatusCreated, response.IdResponse{Id: id, Message: "Ответ добавлен"})
+}
+
+func (h *Handler) createSeveral(c *gin.Context) {
+	dto := []*models.AnswerDTO{}
+	if err := c.BindJSON(&dto); err != nil {
+		response.NewErrorResponse(c, http.StatusBadRequest, err.Error(), "Отправлены некорректные данные")
+		return
+	}
+
+	if err := h.service.CreateSeveral(c, dto); err != nil {
+		response.NewErrorResponse(c, http.StatusInternalServerError, err.Error(), "Произошла ошибка: "+err.Error())
+		error_bot.Send(c, err.Error(), dto)
+		return
+	}
+	logger.Info("Добавлен ответы", logger.StringAttr("question_id", dto[0].QuestionID))
+
+	c.JSON(http.StatusCreated, response.IdResponse{Message: "Ответы добавлены"})
 }
 
 func (h *Handler) update(c *gin.Context) {
@@ -103,7 +112,7 @@ func (h *Handler) update(c *gin.Context) {
 		return
 	}
 
-	dto := &models.QuestionDTO{}
+	dto := &models.AnswerDTO{}
 	if err := c.BindJSON(dto); err != nil {
 		response.NewErrorResponse(c, http.StatusBadRequest, err.Error(), "Отправлены некорректные данные")
 		return
@@ -115,9 +124,9 @@ func (h *Handler) update(c *gin.Context) {
 		error_bot.Send(c, err.Error(), dto)
 		return
 	}
-	logger.Info("Добавлен вопрос", logger.StringAttr("text", dto.Text), logger.StringAttr("quiz_id", dto.QuizID))
+	logger.Info("Добавлен ответ", logger.StringAttr("text", dto.Text), logger.StringAttr("question_id", dto.QuestionID))
 
-	c.JSON(http.StatusOK, response.IdResponse{Message: "Вопрос обновлен"})
+	c.JSON(http.StatusOK, response.IdResponse{Message: "Ответ обновлен"})
 }
 
 func (h *Handler) delete(c *gin.Context) {
@@ -127,12 +136,12 @@ func (h *Handler) delete(c *gin.Context) {
 		return
 	}
 
-	if err := h.service.Delete(c, &models.DeleteQuestionDTO{ID: id}); err != nil {
+	if err := h.service.Delete(c, &models.DeleteAnswerDTO{ID: id}); err != nil {
 		response.NewErrorResponse(c, http.StatusInternalServerError, err.Error(), "Произошла ошибка: "+err.Error())
 		error_bot.Send(c, err.Error(), id)
 		return
 	}
-	logger.Info("Удален вопрос", logger.StringAttr("id", id))
+	logger.Info("Удален ответ", logger.StringAttr("id", id))
 
 	c.JSON(http.StatusNoContent, response.IdResponse{})
 }

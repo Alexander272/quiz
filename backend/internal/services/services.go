@@ -16,6 +16,7 @@ type Services struct {
 
 	Quiz
 	Question
+	Answer
 }
 
 type Deps struct {
@@ -35,8 +36,9 @@ func NewServices(deps Deps) *Services {
 	session := NewSessionService(deps.Keycloak, role)
 	permission := NewPermissionService("configs/privacy.conf", menu, role)
 
+	answer := NewAnswerService(deps.Repos.Answer)
+	question := NewQuestionService(deps.Repos.Question, answer)
 	quiz := NewQuizService(deps.Repos.Quiz)
-	question := NewQuestionService(deps.Repos.Question)
 
 	return &Services{
 		MenuItem:   menuItem,
@@ -47,5 +49,6 @@ func NewServices(deps Deps) *Services {
 
 		Quiz:     quiz,
 		Question: question,
+		Answer:   answer,
 	}
 }

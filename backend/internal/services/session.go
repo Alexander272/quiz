@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/Alexander272/quiz/backend/internal/constants"
 	"github.com/Alexander272/quiz/backend/internal/models"
 	"github.com/Alexander272/quiz/backend/pkg/auth"
 )
@@ -99,8 +100,8 @@ func (s *SessionService) DecodeAccessToken(ctx context.Context, token string) (*
 		a := access.(map[string]interface{})["roles"]
 		roles := a.([]interface{})
 		for _, r := range roles {
-			if strings.Contains(r.(string), "reagents") {
-				role = strings.Replace(r.(string), "reagents_", "", 1)
+			if strings.Contains(r.(string), constants.ServiceName) {
+				role = strings.Replace(r.(string), constants.ServiceName+"_", "", 1)
 				break
 			}
 		}
