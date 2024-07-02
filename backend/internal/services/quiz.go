@@ -20,10 +20,19 @@ func NewQuizService(repo repository.Quiz) *QuizService {
 }
 
 type Quiz interface {
+	Get(context.Context, *models.GetQuizzesDTO) ([]*models.Quiz, error)
 	GetById(context.Context, *models.GetQuizDTO) (*models.Quiz, error)
 	Create(context.Context, *models.QuizDTO) (string, error)
 	Update(context.Context, *models.QuizDTO) error
 	Delete(context.Context, *models.DeleteQuizDTO) error
+}
+
+func (s *QuizService) Get(ctx context.Context, req *models.GetQuizzesDTO) ([]*models.Quiz, error) {
+	data, err := s.repo.Get(ctx, req)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get quizzes. error: %w", err)
+	}
+	return data, nil
 }
 
 func (s *QuizService) GetById(ctx context.Context, req *models.GetQuizDTO) (*models.Quiz, error) {

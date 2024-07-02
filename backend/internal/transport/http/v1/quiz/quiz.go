@@ -3,6 +3,7 @@ package quiz
 import (
 	"errors"
 	"net/http"
+	"time"
 
 	"github.com/Alexander272/quiz/backend/internal/models"
 	"github.com/Alexander272/quiz/backend/internal/models/response"
@@ -28,11 +29,26 @@ func Register(api *gin.RouterGroup, service services.Quiz, middleware *middlewar
 
 	quiz := api.Group("/quiz")
 	{
+		quiz.GET("", handler.get)
 		quiz.GET("/:id", handler.getById)
 		quiz.POST("", handler.create)
 		quiz.PUT("/:id", handler.update)
 		quiz.DELETE("/:id", handler.delete)
 	}
+}
+
+func (h *Handler) get(c *gin.Context) {
+	req := &models.GetQuizzesDTO{
+		Time: time.Now().Unix(),
+	}
+
+	data, err := h.service.Get(c, req)
+	if err != nil {
+		response.NewErrorResponse(c, http.StatusInternalServerError, err.Error(), "Произошла ошибка: "+err.Error())
+		error_bot.Send(c, err.Error(), req)
+		return
+	}
+	c.JSON(http.StatusOK, response.DataResponse{Data: data, Total: len(data)})
 }
 
 func (h *Handler) getById(c *gin.Context) {

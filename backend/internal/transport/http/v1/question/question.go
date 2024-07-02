@@ -43,10 +43,12 @@ func (h *Handler) get(c *gin.Context) {
 		return
 	}
 	hasShuffle := c.Query("shuffle")
+	hasAnswers := c.Query("answers")
 
 	req := &models.GetQuestionsDTO{
 		QuizID:     quizID,
 		HasShuffle: hasShuffle != "false",
+		HasAnswers: hasAnswers != "true",
 	}
 
 	data, err := h.service.Get(c, req)

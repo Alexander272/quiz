@@ -22,10 +22,24 @@ func NewQuizRepo(db *sqlx.DB) *QuizRepo {
 }
 
 type Quiz interface {
+	Get(context.Context, *models.GetQuizzesDTO) ([]*models.Quiz, error)
 	GetById(context.Context, *models.GetQuizDTO) (*models.Quiz, error)
 	Create(context.Context, *models.QuizDTO) (string, error)
 	Update(context.Context, *models.QuizDTO) error
 	Delete(context.Context, *models.DeleteQuizDTO) error
+}
+
+func (r *QuizRepo) Get(ctx context.Context, req *models.GetQuizzesDTO) ([]*models.Quiz, error) {
+	query := fmt.Sprintf(`SELECT id, title, description, image, number_of_attempts, category_id, start_time, end_time, time, author_id
+		FROM %s WHERE is_drawing=false AND end_time<=$1`,
+		QuizTable,
+	)
+
+	data := []*models.Quiz{}
+	if err := r.db.SelectContext(ctx, &data, query, req.Time); err != nil {
+		return nil, fmt.Errorf("failed to execute query. error: %w", err)
+	}
+	return data, nil
 }
 
 func (r *QuizRepo) GetById(ctx context.Context, req *models.GetQuizDTO) (*models.Quiz, error) {
@@ -35,7 +49,7 @@ func (r *QuizRepo) GetById(ctx context.Context, req *models.GetQuizDTO) (*models
 	)
 
 	quiz := &models.Quiz{}
-	if err := r.db.GetContext(ctx, &quiz, query, req.ID); err != nil {
+	if err := r.db.GetContext(ctx, quiz, query, req.ID); err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, models.ErrNoRows
 		}

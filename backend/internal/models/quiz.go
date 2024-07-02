@@ -24,6 +24,9 @@ type Quiz struct {
 type GetQuizDTO struct {
 	ID string `json:"id" db:"id"`
 }
+type GetQuizzesDTO struct {
+	Time int64 `json:"time" db:"time"`
+}
 
 type QuizDTO struct {
 	ID               string        `json:"id" db:"id"`
