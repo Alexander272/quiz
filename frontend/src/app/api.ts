@@ -4,4 +4,6 @@ export const API = {
 		SignOut: `auth/sign-out`,
 		Refresh: `auth/refresh`,
 	},
+	Quiz: 'quiz',
+	Question: 'questions',
 }

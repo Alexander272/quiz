@@ -1,5 +1,5 @@
 import type { PropsWithChildren } from 'react'
-import { Navigate, useLocation } from 'react-router-dom'
+import { Navigate, Outlet, useLocation } from 'react-router-dom'
 
 import { AppRoutes } from '@/constants/routes'
 import { useAppSelector } from '@/hooks/redux'
@@ -12,8 +12,9 @@ export default function PrivateRoute({ children }: PropsWithChildren) {
 	const menu = useAppSelector(getMenu)
 	const location = useLocation()
 
-	if (!token) return <Navigate to={AppRoutes.AUTH} state={{ from: location }} />
-	if (!menu || !menu.length) return <Forbidden />
+	// if (!token) return <Navigate to={AppRoutes.Auth} state={{ from: location }} />
+	// if (!menu || !menu.length) return <Forbidden />
 
+	if (!children) return <Outlet />
 	return children
 }

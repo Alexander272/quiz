@@ -27,13 +27,13 @@ const baseQuery = fetchBaseQuery({
 
 const mutex = new Mutex()
 
-type BaseQuery = BaseQueryFn<string | FetchArgs, unknown, FetchBaseQueryError>
+export type BaseQuery = BaseQueryFn<string | FetchArgs, unknown, FetchBaseQueryError>
 const baseQueryWithReAuth: BaseQuery = async (args, api, extraOptions) => {
 	// mutex позволяет предотвратить множественное обращение на обновление токена
 	await mutex.waitForUnlock()
 	let result = await baseQuery(args, api, extraOptions)
 
-	if (result.error && result.error.status === 401 && api.endpoint !== 'signIn' && api.endpoint != 'refresh') {
+	if (result.error && result.error.status === 401 && api.endpoint !== 'signIn' && api.endpoint !== 'refresh') {
 		if (!mutex.isLocked()) {
 			const release = await mutex.acquire()
 
@@ -59,6 +59,6 @@ const baseQueryWithReAuth: BaseQuery = async (args, api, extraOptions) => {
 export const apiSlice = createApi({
 	reducerPath: 'api',
 	baseQuery: baseQueryWithReAuth,
-	tagTypes: [],
+	tagTypes: ['Quiz', 'Question', 'Answer'],
 	endpoints: () => ({}),
 })

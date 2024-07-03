@@ -116,14 +116,19 @@ export const theme = createTheme({
 			defaultProps: {
 				size: 'small',
 				autoComplete: 'off',
+				onWheel: event => (event.target as HTMLInputElement).blur(),
 			},
 			styleOverrides: {
 				root: {
-					// borderRadius: 12,
 					'& fieldset': {
 						transition: 'all 0.3s ease-in-out',
 					},
 				},
+			},
+		},
+		MuiInputBase: {
+			defaultProps: {
+				disableInjectingGlobalStyles: true,
 			},
 		},
 		MuiOutlinedInput: {

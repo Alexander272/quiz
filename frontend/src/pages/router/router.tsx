@@ -4,8 +4,10 @@ import { createBrowserRouter } from 'react-router-dom'
 import { AppRoutes } from '@/constants/routes'
 import { Layout } from '@/components/Layout/Layout'
 import { NotFound } from '@/pages/notFound/NotFoundLazy'
-import { Home } from '@/pages/home/HomeLazy'
 import { Auth } from '@/pages/auth/AuthLazy'
+import { Home } from '@/pages/home/HomeLazy'
+import { Quizzes } from '@/pages/quiz/QuizzesLazy'
+import { Create } from '@/pages/quiz/create/CreateLazy'
 import PrivateRoute from './PrivateRoute'
 
 const config: RouteObject[] = [
@@ -14,16 +16,25 @@ const config: RouteObject[] = [
 		errorElement: <NotFound />,
 		children: [
 			{
-				path: AppRoutes.AUTH,
+				path: AppRoutes.Auth,
 				element: <Auth />,
 			},
 			{
-				path: AppRoutes.HOME,
-				element: (
-					<PrivateRoute>
-						<Home />
-					</PrivateRoute>
-				),
+				element: <PrivateRoute />,
+				children: [
+					{
+						path: AppRoutes.Home,
+						element: <Home />,
+					},
+					{
+						path: AppRoutes.Quizzes.Index,
+						element: <Quizzes />,
+					},
+					{
+						path: AppRoutes.Quizzes.Create,
+						element: <Create />,
+					},
+				],
 			},
 		],
 	},

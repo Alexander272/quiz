@@ -3,7 +3,7 @@ import { PayloadAction, createSlice } from '@reduxjs/toolkit'
 import type { RootState } from '@/app/store'
 import type { IUser } from './types/user'
 
-interface IUserState {
+export interface IUserState {
 	id: string | null
 	name?: string
 	role: string | null
@@ -23,8 +23,6 @@ const userSlice = createSlice({
 	initialState,
 	reducers: {
 		setUser: (state, action: PayloadAction<IUser>) => {
-			// state.user = action.payload
-
 			state.id = action.payload.id
 			state.name = action.payload.name
 			state.role = action.payload.role

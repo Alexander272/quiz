@@ -1,4 +1,8 @@
 export const AppRoutes = {
-	HOME: '/',
-	AUTH: '/auth',
+	Home: '/',
+	Auth: '/auth',
+	Quizzes: {
+		Index: '/quizzes',
+		Create: '/quizzes/create',
+	},
 }

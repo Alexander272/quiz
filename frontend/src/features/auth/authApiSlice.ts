@@ -12,7 +12,7 @@ const authApiSlice = apiSlice.injectEndpoints({
 	endpoints: builder => ({
 		signIn: builder.mutation<{ data: IUser }, ISignIn>({
 			query: data => ({
-				url: API.auth.signIn,
+				url: API.Auth.SignIn,
 				method: 'POST',
 				body: data,
 			}),
@@ -28,7 +28,7 @@ const authApiSlice = apiSlice.injectEndpoints({
 
 		signOut: builder.mutation<null, null>({
 			query: () => ({
-				url: API.auth.signOut,
+				url: API.Auth.SignOut,
 				method: 'POST',
 			}),
 			onQueryStarted: async (_arg, api) => {
@@ -44,7 +44,7 @@ const authApiSlice = apiSlice.injectEndpoints({
 
 		refresh: builder.query<{ data: IUser }, null>({
 			query: () => ({
-				url: API.auth.refresh,
+				url: API.Auth.Refresh,
 				method: 'POST',
 			}),
 		}),
