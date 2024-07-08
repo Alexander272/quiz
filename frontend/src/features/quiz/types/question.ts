@@ -1,17 +1,17 @@
-import { IAnswer, IAnswerForm } from './answer'
+import { IAnswer, IAnswerDTO, IAnswerForm } from './answer'
 
 export interface IQuestion {
 	id: string
 	number: number
 	quizId: string
 	text: string
-	description?: string
+	description: string
 	image?: string
 	hasShuffle: boolean
 	level: string
 	points: number
-	time: string
-	answers?: (IAnswer | undefined)[]
+	time: number
+	answers: IAnswer[]
 }
 
 export interface IQuestionDTO {
@@ -19,28 +19,30 @@ export interface IQuestionDTO {
 	number: number
 	quizId: string
 	text: string
-	description: string
-	image: string
+	description?: string
+	// image?: File | string
+	image?: string
 	hasShuffle: boolean
 	level: string
 	points: number
-	time: string
+	time: number
+	answers: IAnswerDTO[]
 }
 
 export interface IGetQuestionDTO {
-	quizId: string
-	hasAnswers: boolean
-	hasShuffle: boolean
+	quiz: string
+	answers: boolean
+	shuffle: boolean
 }
 
 export interface IQuestionForm {
 	number: number
 	text: string
 	description: string
-	image?: File
+	image?: File | string
 	hasShuffle: boolean
 	level: string
 	points: number
-	time: string
+	time: number
 	answers: IAnswerForm[]
 }

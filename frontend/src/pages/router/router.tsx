@@ -7,7 +7,9 @@ import { NotFound } from '@/pages/notFound/NotFoundLazy'
 import { Auth } from '@/pages/auth/AuthLazy'
 import { Home } from '@/pages/home/HomeLazy'
 import { Quizzes } from '@/pages/quiz/QuizzesLazy'
+import { MyQuizzes } from '../quiz/my/MyQuizzesLazy'
 import { Create } from '@/pages/quiz/create/CreateLazy'
+import { Edit } from '@/pages/quiz/edit/EditLazy'
 import PrivateRoute from './PrivateRoute'
 
 const config: RouteObject[] = [
@@ -31,8 +33,16 @@ const config: RouteObject[] = [
 						element: <Quizzes />,
 					},
 					{
+						path: AppRoutes.Quizzes.My,
+						element: <MyQuizzes />,
+					},
+					{
 						path: AppRoutes.Quizzes.Create,
 						element: <Create />,
+					},
+					{
+						path: AppRoutes.Quizzes.Edit + ':id',
+						element: <Edit />,
 					},
 				],
 			},

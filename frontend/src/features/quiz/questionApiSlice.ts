@@ -13,8 +13,8 @@ const questionApiSlice = apiSlice.injectEndpoints({
 				url: API.Question,
 				params: new URLSearchParams(
 					Object.entries(data).filter(item => {
-						if (item[0] == 'hasAnswers' && item[1] == false) return false
-						if (item[0] == 'hasShuffle' && item[1] == true) return false
+						if (item[0] == 'answers' && item[1] == false) return false
+						if (item[0] == 'shuffle' && item[1] == true) return false
 
 						return true
 					})
@@ -29,7 +29,7 @@ const questionApiSlice = apiSlice.injectEndpoints({
 					toast.error(fetchError.data.message, { autoClose: false })
 				}
 			},
-			providesTags: (_res, _err, arg) => [{ type: 'Question', id: arg.quizId }],
+			providesTags: (_res, _err, arg) => [{ type: 'Question', id: arg.quiz }],
 		}),
 		getQuestionById: builder.query<{ data: IQuestion }, string>({
 			query: id => ({
@@ -66,10 +66,11 @@ const questionApiSlice = apiSlice.injectEndpoints({
 				{ type: 'Question', id: arg.quizId },
 			],
 		}),
-		deleteQuestion: builder.mutation<void, IQuestionDTO>({
+		deleteQuestion: builder.mutation<void, { quizId: string; id: string }>({
 			query: data => ({
 				url: `${API.Question}/${data.id}`,
 				method: 'DELETE',
+				params: new URLSearchParams({ quizId: data.quizId }),
 			}),
 			invalidatesTags: (_res, _err, arg) => [
 				{ type: 'Question', id: arg.id },

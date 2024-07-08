@@ -1,9 +1,9 @@
 import { Box } from '@mui/material'
 
+import { MyQuizList } from '@/features/quiz/components/quiz/MyQuizList'
 import { PageBox } from '@/styled/PageBox'
-import { QuizList } from '@/features/quiz/components/quiz/QuizList'
 
-export default function Quizzes() {
+export default function MyQuizzes() {
 	return (
 		<PageBox>
 			<Box
@@ -11,6 +11,8 @@ export default function Quizzes() {
 				paddingX={2}
 				paddingY={1}
 				width={'100%'}
+				maxWidth={'1200px'}
+				marginX={'auto'}
 				border={'1px solid rgba(0, 0, 0, 0.12)'}
 				// flexGrow={1}
 				height={'fit-content'}
@@ -20,7 +22,7 @@ export default function Quizzes() {
 				flexDirection={'column'}
 				sx={{ backgroundColor: '#fff', userSelect: 'none' }}
 			>
-				<QuizList />
+				<MyQuizList />
 			</Box>
 		</PageBox>
 	)

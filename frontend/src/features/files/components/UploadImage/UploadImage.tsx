@@ -10,8 +10,8 @@ import Input from './Input'
 type Props = {
 	fullscreen?: boolean
 	sx?: SxProps<Theme>
-	value?: File
-	onChange: (file?: File) => void
+	value?: File | string
+	onChange: (file?: File | null) => void
 }
 
 export const UploadImage: FC<Props> = props => {
@@ -20,7 +20,7 @@ export const UploadImage: FC<Props> = props => {
 }
 
 const Preview: FC<Props> = ({ value, onChange, sx }) => {
-	const deleteHandler = () => onChange()
+	const deleteHandler = () => onChange(null)
 
 	if (!value) return null
 	return (
@@ -55,7 +55,7 @@ const Preview: FC<Props> = ({ value, onChange, sx }) => {
 			>
 				<Stack direction={'row'} spacing={2}>
 					<Button
-						href={URL.createObjectURL(value)}
+						href={typeof value == 'string' ? '/' + value : URL.createObjectURL(value)}
 						target='_blank'
 						rel='noopener noreferrer'
 						sx={{ minWidth: 44, boxShadow: 'inset 0 0 0px 20px white' }}
@@ -67,7 +67,10 @@ const Preview: FC<Props> = ({ value, onChange, sx }) => {
 					</Button>
 				</Stack>
 			</Box>
-			<Image src={URL.createObjectURL(value)} alt={value.name} />
+			<Image
+				src={typeof value == 'string' ? '/' + value : URL.createObjectURL(value)}
+				alt={typeof value == 'string' ? value : value.name}
+			/>
 		</Box>
 	)
 }

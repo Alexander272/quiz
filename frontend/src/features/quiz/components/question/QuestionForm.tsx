@@ -1,40 +1,124 @@
 import { FC } from 'react'
-import { Button, Checkbox, Divider, FormControlLabel, Stack, TextField, useTheme } from '@mui/material'
+import {
+	Button,
+	Checkbox,
+	CircularProgress,
+	Divider,
+	FormControlLabel,
+	Stack,
+	TextField,
+	Typography,
+	useTheme,
+} from '@mui/material'
 import { Controller, FormProvider, useForm } from 'react-hook-form'
+import { toast } from 'react-toastify'
 
-import type { IQuestionForm } from '../../types/question'
+import type { IFetchError } from '@/app/types/error'
+import type { IQuestion, IQuestionDTO, IQuestionForm } from '../../types/question'
 import { UploadImage } from '@/features/files/components/UploadImage/UploadImage'
 import { SaveIcon } from '@/components/Icons/SaveIcon'
 import { TrashIcon } from '@/components/Icons/TrashIcon'
 import { AnswerForm } from '../answer/AnswerForm'
+import { useCreateQuestionMutation, useDeleteQuestionMutation, useUpdateQuestionMutation } from '../../questionApiSlice'
+import { Fallback } from '@/components/Fallback/Fallback'
+import { RefreshIcon } from '@/components/Icons/RefreshIcon'
+import { useDeleteFileMutation, useUploadFilesMutation } from '@/features/files/filesApiSlice'
 
 const defaultValues: IQuestionForm = {
-	number: 0,
+	number: 1,
 	text: '',
 	description: '',
 	hasShuffle: true,
 	level: '1',
 	points: 1,
-	time: '',
+	time: 0,
 	answers: [
 		{ number: 1, text: '', isCorrect: false },
 		{ number: 2, text: '', isCorrect: false },
 	],
 }
 
-type Props = unknown
+type Props = {
+	quizId: string
+	method: 'create' | 'update'
+	position?: number
+	data?: IQuestion
+}
 
-export const QuestionForm: FC<Props> = () => {
-	// const data = { data: { id: 'test' } }
+export const QuestionForm: FC<Props> = ({ quizId, method, position, data }) => {
 	const { palette } = useTheme()
 
-	const methods = useForm<IQuestionForm>({ defaultValues: defaultValues })
+	const [create, { isLoading }] = useCreateQuestionMutation()
+	const [update, { isLoading: isLoadUpdate }] = useUpdateQuestionMutation()
+	const [remove, { isLoading: isLoadRemove }] = useDeleteQuestionMutation()
+
+	const [upload] = useUploadFilesMutation()
+	const [removeImage] = useDeleteFileMutation()
+
+	//TODO поправить данные
+	const methods = useForm<IQuestionForm>({ values: data || { ...defaultValues, number: position || 1 } })
 	const {
 		control,
-		formState: { isDirty },
+		handleSubmit,
+		reset,
+		formState: { dirtyFields },
 	} = methods
 
-	// if (!data?.data.id) return null
+	const resetHandler = () => reset()
+
+	const saveHandler = async (form: IQuestionForm) => {
+		const newData: IQuestionDTO = {
+			quizId: quizId,
+			...form,
+			number: data?.number || position || 1,
+			image: '',
+			// imageLink: !form.image || typeof form.image == 'object' ? '' : data?.image,
+			// image: typeof form.image == 'string' ? undefined : form.image,
+		}
+		console.log('data', data)
+		console.log('question', form)
+
+		try {
+			if (!form.image || typeof form.image == 'object') {
+				if (data?.image) {
+					removeImage(data.image)
+					// удалить картинку если она была
+				}
+				// сохранить картинку и записать полученный путь в newData
+				if (form.image) {
+					const fileData = new FormData()
+					console.log(form.image)
+					fileData.append('path', `${quizId}/${data?.id || 'temp'}/${(form.image as File).name}`)
+					fileData.append('image', form.image as File)
+					const payload = await upload({ data: fileData }).unwrap()
+					newData.image = payload.data
+				}
+			}
+
+			if (method == 'create') {
+				await create(newData).unwrap()
+				reset(defaultValues)
+			} else {
+				await update(newData).unwrap()
+				reset(newData)
+			}
+		} catch (error) {
+			const fetchError = error as IFetchError
+			toast.error(fetchError.data.message, { autoClose: false })
+		}
+	}
+
+	const deleteHandler = async () => {
+		if (!data?.id) return
+
+		try {
+			await remove({ id: data.id, quizId: data.quizId })
+		} catch (error) {
+			const fetchError = error as IFetchError
+			toast.error(fetchError.data.message, { autoClose: false })
+		}
+	}
+
 	return (
 		<Stack
 			// spacing={1}
@@ -46,9 +130,67 @@ export const QuestionForm: FC<Props> = () => {
 			// maxWidth={'98%'}
 			position={'relative'}
 			component={'form'}
+			onSubmit={handleSubmit(saveHandler)}
 		>
+			{isLoading || isLoadUpdate ? (
+				<Fallback position={'absolute'} left={0} top={0} background={'#c6e5ff42'} zIndex={5} />
+			) : null}
+
 			<FormProvider {...methods}>
-				<Stack></Stack>
+				<Stack
+					direction={'row'}
+					justifyContent={'space-between'}
+					alignItems={'center'}
+					paddingX={2}
+					paddingY={1.5}
+					// borderRadius={2}
+					mb={2}
+					borderBottom={'1px solid #E0E0E0'}
+					// sx={{ background: '#f8fafc' }}
+				>
+					<Stack direction={'row'}>
+						<Typography fontSize={'1.2rem'}>Вопрос №{data?.number || position}</Typography>
+					</Stack>
+
+					<Stack spacing={1} direction={'row'}>
+						<Button
+							onClick={resetHandler}
+							disabled={!Object.keys(dirtyFields).length}
+							variant='outlined'
+							color='gray'
+							sx={{ minWidth: 44 }}
+						>
+							<RefreshIcon
+								fontSize={18}
+								fill={!Object.keys(dirtyFields).length ? palette.action.disabled : palette.gray.main}
+							/>
+						</Button>
+						<Button
+							disabled={!Object.keys(dirtyFields).length}
+							variant='outlined'
+							type='submit'
+							sx={{ minWidth: 44 }}
+						>
+							<SaveIcon
+								fontSize={18}
+								fill={!Object.keys(dirtyFields).length ? palette.action.disabled : palette.primary.main}
+							/>
+						</Button>
+						<Button
+							onClick={deleteHandler}
+							disabled={!data}
+							variant='outlined'
+							color='error'
+							sx={{ minWidth: 44 }}
+						>
+							{isLoadRemove ? (
+								<CircularProgress size={16} color='error' />
+							) : (
+								<TrashIcon fontSize={18} fill={!data ? palette.action.disabled : palette.error.main} />
+							)}
+						</Button>
+					</Stack>
+				</Stack>
 
 				<Stack spacing={1.5} direction={'row'}>
 					<Controller
@@ -74,7 +216,7 @@ export const QuestionForm: FC<Props> = () => {
 							render={({ field, fieldState: { error } }) => (
 								<TextField
 									{...field}
-									label='Вопрос'
+									label='Текст вопроса'
 									fullWidth
 									multiline
 									minRows={3}
@@ -108,31 +250,6 @@ export const QuestionForm: FC<Props> = () => {
 				{/* //TODO куда-то еще надо ответы запихивать и кнопку для их добавления */}
 				<Divider sx={{ width: '86%', marginX: 'auto', mt: 2, mb: 3 }} />
 				<AnswerForm />
-
-				<Stack spacing={1} direction={'row'} position={'absolute'} bottom={-14} right={30}>
-					<Button
-						disabled={!isDirty}
-						variant='outlined'
-						sx={{
-							minWidth: 44,
-							boxShadow: 'inset 0 0 0px 20px white',
-							':hover': { boxShadow: 'inset 0 0 0px 20px #F5F6FA' },
-						}}
-					>
-						<SaveIcon fontSize={18} fill={!isDirty ? palette.action.disabled : palette.primary.main} />
-					</Button>
-					<Button
-						variant='outlined'
-						color='error'
-						sx={{
-							minWidth: 44,
-							boxShadow: 'inset 0 0 0px 20px white',
-							':hover': { boxShadow: 'inset 0 0 0 20px #fdf7f7' },
-						}}
-					>
-						<TrashIcon fontSize={18} fill={palette.error.main} />
-					</Button>
-				</Stack>
 			</FormProvider>
 		</Stack>
 	)

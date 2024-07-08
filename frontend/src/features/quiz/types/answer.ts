@@ -4,21 +4,22 @@ export interface IAnswer {
 	number: number
 	text: string
 	image?: string
-	isCorrect?: boolean
+	isCorrect: boolean
 }
 
 export interface IAnswerDTO {
 	id?: string
-	questionId: string
+	// questionId: string
 	number: number
 	text: string
-	image: string
+	// image?: string
 	isCorrect: boolean
 }
 
 export interface IAnswerForm {
+	id?: string
 	number: number
 	text: string
-	image?: File
+	// image?: File | string
 	isCorrect: boolean
 }
