@@ -48,7 +48,7 @@ func (h *Handler) get(c *gin.Context) {
 	req := &models.GetQuestionsDTO{
 		QuizID:     quizID,
 		HasShuffle: hasShuffle != "false",
-		HasAnswers: hasAnswers != "true",
+		HasAnswers: hasAnswers == "true",
 	}
 
 	data, err := h.service.Get(c, req)
@@ -117,7 +117,7 @@ func (h *Handler) update(c *gin.Context) {
 		error_bot.Send(c, err.Error(), dto)
 		return
 	}
-	logger.Info("Добавлен вопрос", logger.StringAttr("text", dto.Text), logger.StringAttr("quiz_id", dto.QuizID))
+	logger.Info("Обновлен вопрос", logger.StringAttr("text", dto.Text), logger.StringAttr("quiz_id", dto.QuizID))
 
 	c.JSON(http.StatusOK, response.IdResponse{Message: "Вопрос обновлен"})
 }
@@ -129,7 +129,13 @@ func (h *Handler) delete(c *gin.Context) {
 		return
 	}
 
-	if err := h.service.Delete(c, &models.DeleteQuestionDTO{ID: id}); err != nil {
+	quizID := c.Query("quizId")
+	if quizID == "" {
+		response.NewErrorResponse(c, http.StatusBadRequest, "empty param", "Id не задан")
+		return
+	}
+
+	if err := h.service.Delete(c, &models.DeleteQuestionDTO{ID: id, QuizID: quizID}); err != nil {
 		response.NewErrorResponse(c, http.StatusInternalServerError, err.Error(), "Произошла ошибка: "+err.Error())
 		error_bot.Send(c, err.Error(), id)
 		return

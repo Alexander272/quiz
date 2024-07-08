@@ -17,6 +17,7 @@ CREATE TABLE IF NOT EXISTS public.quiz
     has_skippable boolean DEFAULT false,
     show_list boolean DEFAULT false,
     show_answers boolean DEFAULT false,
+    show_results boolean DEFAULT false,
     created_at timestamp with time zone DEFAULT now(),
     CONSTRAINT quiz_pkey PRIMARY KEY (id)
 )

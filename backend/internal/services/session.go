@@ -117,7 +117,7 @@ func (s *SessionService) DecodeAccessToken(ctx context.Context, token string) (*
 		userId = uId.(string)
 	}
 
-	user.Id = userId
+	user.ID = userId
 	user.Role = role
 	user.Name = username
 

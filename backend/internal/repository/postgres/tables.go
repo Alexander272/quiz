@@ -8,4 +8,5 @@ const (
 	QuizTable     = "quiz"
 	QuestionTable = "question"
 	AnswerTable   = "answer"
+	ResultTable   = "result"
 )

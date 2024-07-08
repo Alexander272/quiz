@@ -24,6 +24,7 @@ type Answer interface {
 	Create(context.Context, *models.AnswerDTO) (string, error)
 	CreateSeveral(context.Context, []*models.AnswerDTO) error
 	Update(context.Context, *models.AnswerDTO) error
+	DeleteByQuestionId(context.Context, string) error
 	Delete(context.Context, *models.DeleteAnswerDTO) error
 }
 
@@ -61,6 +62,13 @@ func (s *AnswerService) CreateSeveral(ctx context.Context, dto []*models.AnswerD
 func (s *AnswerService) Update(ctx context.Context, dto *models.AnswerDTO) error {
 	if err := s.repo.Update(ctx, dto); err != nil {
 		return fmt.Errorf("failed to update answer. error: %w", err)
+	}
+	return nil
+}
+
+func (s *AnswerService) DeleteByQuestionId(ctx context.Context, id string) error {
+	if err := s.repo.DeleteByQuestionId(ctx, id); err != nil {
+		return fmt.Errorf("failed to delete answers by question id. error: %w", err)
 	}
 	return nil
 }

@@ -42,8 +42,8 @@ func Send(c *gin.Context, e string, request interface{}) {
 
 	message := Message{
 		Service: Service{
-			Id:   "reagents",
-			Name: "Accounting of reagents",
+			Id:   "quiz",
+			Name: "Quiz App",
 		},
 		Data: MessageData{
 			Date:    time.Now().Format("02/01/2006 - 15:04:05"),

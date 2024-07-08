@@ -5,20 +5,25 @@ import (
 	"errors"
 	"fmt"
 	"math/rand"
+	"strings"
 
 	"github.com/Alexander272/quiz/backend/internal/models"
 	"github.com/Alexander272/quiz/backend/internal/repository"
+	"github.com/Alexander272/quiz/backend/pkg/logger"
+	"github.com/google/uuid"
 )
 
 type QuestionService struct {
 	repo   repository.Question
 	answer Answer
+	media  Media
 }
 
-func NewQuestionService(repo repository.Question, answer Answer) *QuestionService {
+func NewQuestionService(repo repository.Question, answer Answer, media Media) *QuestionService {
 	return &QuestionService{
 		repo:   repo,
 		answer: answer,
+		media:  media,
 	}
 }
 
@@ -45,21 +50,22 @@ func (s *QuestionService) Get(ctx context.Context, req *models.GetQuestionsDTO) 
 	}
 
 	//TODO нужны ли мне здесь правильные ответы?
-	answers, err := s.answer.GetByQuiz(ctx, &models.GetAnswersDTO{QuizID: req.QuizID})
+	answers, err := s.answer.GetByQuiz(ctx, &models.GetAnswersDTO{QuizID: req.QuizID, HasCorrect: !req.HasShuffle && req.HasAnswers})
 	if err != nil {
 		return nil, err
 	}
 
 	for _, d := range data {
 		answer := &models.AnswerList{}
-		for _, a := range answers {
-			if a.QuestionID == d.ID {
-				answer = a
+		for _, item := range answers {
+			if item.QuestionID == d.ID {
+				answer = item
 				break
 			}
 		}
 
 		if req.HasShuffle && d.HasShuffle {
+			logger.Debug("random answer list")
 			rand.Shuffle(len(answer.List), func(i, j int) { answer.List[i], answer.List[j] = answer.List[j], answer.List[i] })
 		}
 		d.Answers = answer.List
@@ -88,17 +94,65 @@ func (s *QuestionService) GetById(ctx context.Context, req *models.GetQuestionDT
 }
 
 func (s *QuestionService) Create(ctx context.Context, dto *models.QuestionDTO) (string, error) {
+	dto.ID = uuid.NewString()
+	// if dto.Image.Filename != "" {
+	// 	dto.ImageLink = fmt.Sprintf("media/%s/%s/%s", dto.QuizID, dto.ID, dto.Image.Filename)
+	// 	if err := s.media.SaveFile(dto.Image, dto.ImageLink); err != nil {
+	// 		return "", err
+	// 	}
+	// 	dto.Image = nil
+	// }
+
+	dst := strings.Replace(dto.Image, "temp", dto.ID, 1)
+	if err := s.media.Move(dto.Image, dst); err != nil {
+		return dto.ID, err
+	}
+	dto.Image = dst
+
 	id, err := s.repo.Create(ctx, dto)
 	if err != nil {
 		return id, fmt.Errorf("failed to create question. error: %w", err)
 	}
+
+	for i := range dto.Answers {
+		dto.Answers[i].QuestionID = id
+	}
+	if err := s.answer.CreateSeveral(ctx, dto.Answers); err != nil {
+		return id, err
+	}
+
 	return id, nil
 }
 
 func (s *QuestionService) Update(ctx context.Context, dto *models.QuestionDTO) error {
+	// if dto.ImageLink == "" {
+	// 	if err := s.media.Delete(fmt.Sprintf("media/%s/%s", dto.QuizID, dto.ID)); err != nil {
+	// 		return err
+	// 	}
+	// }
+
+	// if dto.Image.Filename != "" {
+	// 	dto.ImageLink = fmt.Sprintf("media/%s/%s/%s", dto.QuizID, dto.ID, dto.Image.Filename)
+	// 	if err := s.media.SaveFile(dto.Image, dto.ImageLink); err != nil {
+	// 		return err
+	// 	}
+	// 	dto.Image = nil
+	// }
+
 	if err := s.repo.Update(ctx, dto); err != nil {
 		return fmt.Errorf("failed to update question. error: %w", err)
 	}
+
+	if err := s.answer.DeleteByQuestionId(ctx, dto.ID); err != nil {
+		return err
+	}
+	for i := range dto.Answers {
+		dto.Answers[i].QuestionID = dto.ID
+	}
+	if err := s.answer.CreateSeveral(ctx, dto.Answers); err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -106,5 +160,10 @@ func (s *QuestionService) Delete(ctx context.Context, dto *models.DeleteQuestion
 	if err := s.repo.Delete(ctx, dto); err != nil {
 		return fmt.Errorf("failed to delete question. error: %w", err)
 	}
+
+	if err := s.media.Delete(fmt.Sprintf("media/%s/%s", dto.QuizID, dto.ID)); err != nil {
+		return err
+	}
+
 	return nil
 }

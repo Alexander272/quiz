@@ -7,7 +7,6 @@ import (
 	"fmt"
 
 	"github.com/Alexander272/quiz/backend/internal/models"
-	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
 )
 
@@ -63,7 +62,7 @@ func (r *QuestionRepo) Create(ctx context.Context, dto *models.QuestionDTO) (str
 		VALUES (:id, :number, :quiz_id, :text, :description, :image, :has_shuffle, :level, :points, :time)`,
 		QuestionTable,
 	)
-	dto.ID = uuid.New().String()
+	// dto.ID = uuid.New().String()
 
 	if _, err := r.db.NamedExecContext(ctx, query, dto); err != nil {
 		return "", fmt.Errorf("failed to execute query. error: %w", err)

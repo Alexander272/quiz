@@ -76,7 +76,7 @@ func (h *AuthHandler) signIn(c *gin.Context) {
 		logger.StringAttr("section", "auth"),
 		logger.StringAttr("ip", c.ClientIP()),
 		logger.StringAttr("user", user.Name),
-		logger.StringAttr("user_id", user.Id),
+		logger.StringAttr("user_id", user.ID),
 	)
 
 	c.SetSameSite(http.SameSiteLaxMode)
@@ -139,7 +139,7 @@ func (h *AuthHandler) refresh(c *gin.Context) {
 		logger.StringAttr("section", "auth"),
 		logger.StringAttr("ip", c.ClientIP()),
 		logger.StringAttr("user", user.Name),
-		logger.StringAttr("user_id", user.Id),
+		logger.StringAttr("user_id", user.ID),
 	)
 
 	c.SetSameSite(http.SameSiteLaxMode)

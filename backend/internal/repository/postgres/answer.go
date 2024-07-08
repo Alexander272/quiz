@@ -26,6 +26,7 @@ type Answer interface {
 	Create(context.Context, *models.AnswerDTO) (string, error)
 	CreateSeveral(context.Context, []*models.AnswerDTO) error
 	Update(context.Context, *models.AnswerDTO) error
+	DeleteByQuestionId(context.Context, string) error
 	Delete(context.Context, *models.DeleteAnswerDTO) error
 }
 
@@ -56,7 +57,7 @@ func (r *AnswerRepo) GetByQuiz(ctx context.Context, req *models.GetAnswersDTO) (
 		}
 	}
 
-	return nil, fmt.Errorf("not implemented")
+	return list, nil
 }
 
 func (r *AnswerRepo) GetByQuestion(ctx context.Context, req *models.GetAnswersDTO) (*models.AnswerList, error) {
@@ -121,6 +122,15 @@ func (r *AnswerRepo) Update(ctx context.Context, dto *models.AnswerDTO) error {
 }
 
 // TODO возможно стоит сделать UpdateSeveral
+
+func (r *AnswerRepo) DeleteByQuestionId(ctx context.Context, id string) error {
+	query := fmt.Sprintf(`DELETE FROM %s WHERE question_id=$1`, AnswerTable)
+
+	if _, err := r.db.ExecContext(ctx, query, id); err != nil {
+		return fmt.Errorf("failed to execute query. error: %w", err)
+	}
+	return nil
+}
 
 func (r *AnswerRepo) Delete(ctx context.Context, dto *models.DeleteAnswerDTO) error {
 	query := fmt.Sprintf(`DELETE FROM %s WHERE id=:id`, AnswerTable)

@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/Alexander272/quiz/backend/internal/constants"
 	"github.com/Alexander272/quiz/backend/internal/models"
 	"github.com/Alexander272/quiz/backend/internal/models/response"
 	"github.com/Alexander272/quiz/backend/internal/services"
@@ -27,9 +28,10 @@ func NewHandler(service services.Quiz) *Handler {
 func Register(api *gin.RouterGroup, service services.Quiz, middleware *middleware.Middleware) {
 	handler := NewHandler(service)
 
-	quiz := api.Group("/quiz")
+	quiz := api.Group("/quizzes", middleware.VerifyToken)
 	{
 		quiz.GET("", handler.get)
+		quiz.GET("/my", handler.getByAuthor)
 		quiz.GET("/:id", handler.getById)
 		quiz.POST("", handler.create)
 		quiz.PUT("/:id", handler.update)
@@ -46,6 +48,23 @@ func (h *Handler) get(c *gin.Context) {
 	if err != nil {
 		response.NewErrorResponse(c, http.StatusInternalServerError, err.Error(), "Произошла ошибка: "+err.Error())
 		error_bot.Send(c, err.Error(), req)
+		return
+	}
+	c.JSON(http.StatusOK, response.DataResponse{Data: data, Total: len(data)})
+}
+
+func (h *Handler) getByAuthor(c *gin.Context) {
+	u, exists := c.Get(constants.CtxUser)
+	if !exists {
+		response.NewErrorResponse(c, http.StatusUnauthorized, "empty user", "сессия не найдена")
+		return
+	}
+	user := u.(models.User)
+
+	data, err := h.service.GetByAuthor(c, user.ID)
+	if err != nil {
+		response.NewErrorResponse(c, http.StatusInternalServerError, err.Error(), "Произошла ошибка: "+err.Error())
+		error_bot.Send(c, err.Error(), user.ID)
 		return
 	}
 	c.JSON(http.StatusOK, response.DataResponse{Data: data, Total: len(data)})
@@ -73,10 +92,23 @@ func (h *Handler) getById(c *gin.Context) {
 
 func (h *Handler) create(c *gin.Context) {
 	dto := &models.QuizDTO{}
-	if err := c.BindJSON(dto); err != nil {
+	// if err := c.BindJSON(dto); err != nil {
+	// 	response.NewErrorResponse(c, http.StatusBadRequest, err.Error(), "Отправлены некорректные данные")
+	// 	return
+	// }
+	if err := c.ShouldBind(&dto); err != nil {
 		response.NewErrorResponse(c, http.StatusBadRequest, err.Error(), "Отправлены некорректные данные")
 		return
 	}
+	logger.Debug("create quiz", logger.AnyAttr("dto", *dto))
+
+	u, exists := c.Get(constants.CtxUser)
+	if !exists {
+		response.NewErrorResponse(c, http.StatusUnauthorized, "empty user", "сессия не найдена")
+		return
+	}
+	user := u.(models.User)
+	dto.AuthorID = user.ID
 
 	id, err := h.service.Create(c, dto)
 	if err != nil {
@@ -97,11 +129,16 @@ func (h *Handler) update(c *gin.Context) {
 	}
 
 	dto := &models.QuizDTO{}
-	if err := c.BindJSON(dto); err != nil {
+	// if err := c.BindJSON(dto); err != nil {
+	// 	response.NewErrorResponse(c, http.StatusBadRequest, err.Error(), "Отправлены некорректные данные")
+	// 	return
+	// }
+	if err := c.ShouldBind(&dto); err != nil {
 		response.NewErrorResponse(c, http.StatusBadRequest, err.Error(), "Отправлены некорректные данные")
 		return
 	}
 	dto.ID = id
+	logger.Debug("update quiz", logger.AnyAttr("dto", *dto))
 
 	if err := h.service.Update(c, dto); err != nil {
 		response.NewErrorResponse(c, http.StatusInternalServerError, err.Error(), "Произошла ошибка: "+err.Error())

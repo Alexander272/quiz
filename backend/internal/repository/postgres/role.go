@@ -43,7 +43,7 @@ func (r *RoleRepo) GetAll(ctx context.Context, req *models.GetRolesDTO) ([]*mode
 	roles := []*models.RoleFull{}
 	for _, rfd := range data {
 		roles = append(roles, &models.RoleFull{
-			Id:          rfd.Id,
+			ID:          rfd.ID,
 			Name:        rfd.Name,
 			Level:       rfd.Level,
 			Extends:     rfd.Extends,
@@ -69,7 +69,7 @@ func (r *RoleRepo) GetAllWithNames(ctx context.Context, req *models.GetRolesDTO)
 	roles := []*models.RoleFull{}
 	for _, rfd := range data {
 		roles = append(roles, &models.RoleFull{
-			Id:          rfd.Id,
+			ID:          rfd.ID,
 			Name:        rfd.Name,
 			Level:       rfd.Level,
 			Extends:     rfd.Extends,
@@ -106,27 +106,27 @@ func (r *RoleRepo) Get(ctx context.Context, roleName string) (*models.Role, erro
 
 	//EDIT Возможно можно это как-то покрасивее написать
 	for _, r := range data {
-		m, exist := menu[r.Id]
+		m, exist := menu[r.ID]
 		if !exist {
-			menu[r.Id] = r.Menu
+			menu[r.ID] = r.Menu
 
 			if r.Name == roleName {
-				role.Id = r.Id
+				role.ID = r.ID
 				role.Name = r.Name
-				extends[r.Id] = struct{}{}
+				extends[r.ID] = struct{}{}
 				for _, v := range r.Extends {
 					extends[v] = struct{}{}
 				}
 			}
 		} else {
 			m = append(m, r.Menu...)
-			menu[r.Id] = m
+			menu[r.ID] = m
 		}
 	}
 
 	for i := 1; i < len(extends); i++ {
 		for _, r := range data {
-			_, exist := extends[r.Id]
+			_, exist := extends[r.ID]
 			if exist {
 				for _, v := range r.Extends {
 					extends[v] = struct{}{}
@@ -164,7 +164,7 @@ func (r *RoleRepo) Create(ctx context.Context, role *models.RoleDTO) error {
 func (r *RoleRepo) Update(ctx context.Context, role *models.RoleDTO) error {
 	query := fmt.Sprintf(`UPDATE %s SET name=$1, level=$2, extends=$3, description=$4 WHERE id=$5`, RoleTable)
 
-	_, err := r.db.ExecContext(ctx, query, role.Name, role.Level, pq.Array(role.Extends), role.Description, role.Id)
+	_, err := r.db.ExecContext(ctx, query, role.Name, role.Level, pq.Array(role.Extends), role.Description, role.ID)
 	if err != nil {
 		return fmt.Errorf("failed to execute query. error: %w", err)
 	}

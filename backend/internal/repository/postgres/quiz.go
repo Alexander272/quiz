@@ -23,6 +23,7 @@ func NewQuizRepo(db *sqlx.DB) *QuizRepo {
 
 type Quiz interface {
 	Get(context.Context, *models.GetQuizzesDTO) ([]*models.Quiz, error)
+	GetByAuthor(context.Context, string) ([]*models.Quiz, error)
 	GetById(context.Context, *models.GetQuizDTO) (*models.Quiz, error)
 	Create(context.Context, *models.QuizDTO) (string, error)
 	Update(context.Context, *models.QuizDTO) error
@@ -37,6 +38,19 @@ func (r *QuizRepo) Get(ctx context.Context, req *models.GetQuizzesDTO) ([]*model
 
 	data := []*models.Quiz{}
 	if err := r.db.SelectContext(ctx, &data, query, req.Time); err != nil {
+		return nil, fmt.Errorf("failed to execute query. error: %w", err)
+	}
+	return data, nil
+}
+
+func (r *QuizRepo) GetByAuthor(ctx context.Context, authorId string) ([]*models.Quiz, error) {
+	query := fmt.Sprintf(`SELECT id, title, description, image, number_of_attempts, category_id, start_time, end_time, time, author_id
+		FROM %s WHERE author_id=$1`,
+		QuizTable,
+	)
+
+	data := []*models.Quiz{}
+	if err := r.db.SelectContext(ctx, &data, query, authorId); err != nil {
 		return nil, fmt.Errorf("failed to execute query. error: %w", err)
 	}
 	return data, nil
@@ -64,7 +78,10 @@ func (r *QuizRepo) Create(ctx context.Context, dto *models.QuizDTO) (string, err
 		:category_id, :start_time, :end_time, :has_shuffle, :has_skippable, :show_list, :show_answers, :show_results, :time, :author_id)`,
 		QuizTable,
 	)
-	dto.ID = uuid.New().String()
+	// dto.ID = uuid.New().String()
+	if dto.CategoryID == "" {
+		dto.CategoryID = uuid.Nil.String()
+	}
 
 	if _, err := r.db.NamedExecContext(ctx, query, dto); err != nil {
 		return "", fmt.Errorf("failed to execute query. error: %w", err)
@@ -78,6 +95,9 @@ func (r *QuizRepo) Update(ctx context.Context, dto *models.QuizDTO) error {
 		show_answers=:show_answers, show_results=:show_results, time=:time, author_id=:author_id WHERE id=:id`,
 		QuizTable,
 	)
+	if dto.CategoryID == "" {
+		dto.CategoryID = uuid.Nil.String()
+	}
 
 	if _, err := r.db.NamedExecContext(ctx, query, dto); err != nil {
 		return fmt.Errorf("failed to execute query. error: %w", err)

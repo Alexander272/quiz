@@ -14,6 +14,7 @@ type Services struct {
 	Session
 	Permission
 
+	Media
 	Quiz
 	Question
 	Answer
@@ -36,9 +37,10 @@ func NewServices(deps Deps) *Services {
 	session := NewSessionService(deps.Keycloak, role)
 	permission := NewPermissionService("configs/privacy.conf", menu, role)
 
+	media := NewMediaService()
 	answer := NewAnswerService(deps.Repos.Answer)
-	question := NewQuestionService(deps.Repos.Question, answer)
-	quiz := NewQuizService(deps.Repos.Quiz)
+	question := NewQuestionService(deps.Repos.Question, answer, media)
+	quiz := NewQuizService(deps.Repos.Quiz, media)
 
 	return &Services{
 		MenuItem:   menuItem,
@@ -47,6 +49,7 @@ func NewServices(deps Deps) *Services {
 		Session:    session,
 		Permission: permission,
 
+		Media:    media,
 		Quiz:     quiz,
 		Question: question,
 		Answer:   answer,
