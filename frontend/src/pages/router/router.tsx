@@ -8,6 +8,7 @@ import { Auth } from '@/pages/auth/AuthLazy'
 import { Home } from '@/pages/home/HomeLazy'
 import { Quizzes } from '@/pages/quiz/QuizzesLazy'
 import { MyQuizzes } from '../quiz/my/MyQuizzesLazy'
+import { Quiz } from '../quiz/start/QuizLazy'
 import { Create } from '@/pages/quiz/create/CreateLazy'
 import { Edit } from '@/pages/quiz/edit/EditLazy'
 import PrivateRoute from './PrivateRoute'
@@ -27,6 +28,10 @@ const config: RouteObject[] = [
 					{
 						path: AppRoutes.Home,
 						element: <Home />,
+					},
+					{
+						path: AppRoutes.Home + '/:id',
+						element: <Quiz />,
 					},
 					{
 						path: AppRoutes.Quizzes.Index,

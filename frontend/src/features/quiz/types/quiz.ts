@@ -48,3 +48,12 @@ export interface IQuizForm {
 	showResults: boolean
 	time: number
 }
+
+export interface IUserQuizForm {
+	[id: string]: {
+		// answers: string[]
+		answers: {
+			[id: string]: boolean
+		}
+	}
+}

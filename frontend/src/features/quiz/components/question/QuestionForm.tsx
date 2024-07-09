@@ -23,6 +23,8 @@ import { useCreateQuestionMutation, useDeleteQuestionMutation, useUpdateQuestion
 import { Fallback } from '@/components/Fallback/Fallback'
 import { RefreshIcon } from '@/components/Icons/RefreshIcon'
 import { useDeleteFileMutation, useUploadFilesMutation } from '@/features/files/filesApiSlice'
+import { Confirm } from '@/components/Confirm/Confirm'
+import { WarningIcon } from '@/components/Icons/WarningIcon'
 
 const defaultValues: IQuestionForm = {
 	number: 1,
@@ -165,6 +167,7 @@ export const QuestionForm: FC<Props> = ({ quizId, method, position, data }) => {
 								fill={!Object.keys(dirtyFields).length ? palette.action.disabled : palette.gray.main}
 							/>
 						</Button>
+
 						<Button
 							disabled={!Object.keys(dirtyFields).length}
 							variant='outlined'
@@ -176,19 +179,34 @@ export const QuestionForm: FC<Props> = ({ quizId, method, position, data }) => {
 								fill={!Object.keys(dirtyFields).length ? palette.action.disabled : palette.primary.main}
 							/>
 						</Button>
-						<Button
+
+						<Confirm
 							onClick={deleteHandler}
 							disabled={!data}
-							variant='outlined'
-							color='error'
-							sx={{ minWidth: 44 }}
+							buttonComponent={
+								<Button disabled={!data} variant='outlined' color='error' sx={{ minWidth: 44 }}>
+									{isLoadRemove ? (
+										<CircularProgress size={16} color='error' />
+									) : (
+										<TrashIcon
+											fontSize={18}
+											fill={!data ? palette.action.disabled : palette.error.main}
+										/>
+									)}
+								</Button>
+							}
 						>
-							{isLoadRemove ? (
-								<CircularProgress size={16} color='error' />
-							) : (
-								<TrashIcon fontSize={18} fill={!data ? palette.action.disabled : palette.error.main} />
-							)}
-						</Button>
+							<Stack direction={'row'} spacing={1} alignItems={'center'} justifyContent={'center'} mb={1}>
+								<WarningIcon fill={palette.error.main} />
+								<Typography fontSize={'1.1rem'} fontWeight='bold'>
+									Удаление
+								</Typography>
+							</Stack>
+
+							<Typography maxWidth={300} align='center'>
+								Вы уверены, что хотите удалить вопрос?
+							</Typography>
+						</Confirm>
 					</Stack>
 				</Stack>
 

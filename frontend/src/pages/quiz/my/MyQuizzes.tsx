@@ -8,8 +8,8 @@ export default function MyQuizzes() {
 		<PageBox>
 			<Box
 				borderRadius={3}
-				paddingX={2}
-				paddingY={1}
+				paddingX={3}
+				paddingY={3}
 				width={'100%'}
 				maxWidth={'1200px'}
 				marginX={'auto'}

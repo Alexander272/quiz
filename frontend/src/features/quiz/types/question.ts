@@ -31,8 +31,8 @@ export interface IQuestionDTO {
 
 export interface IGetQuestionDTO {
 	quiz: string
-	answers: boolean
-	shuffle: boolean
+	answers?: boolean
+	shuffle?: boolean
 }
 
 export interface IQuestionForm {
