@@ -9,7 +9,6 @@ import (
 
 	"github.com/Alexander272/quiz/backend/internal/models"
 	"github.com/Alexander272/quiz/backend/internal/repository"
-	"github.com/Alexander272/quiz/backend/pkg/logger"
 	"github.com/google/uuid"
 )
 
@@ -65,7 +64,6 @@ func (s *QuestionService) Get(ctx context.Context, req *models.GetQuestionsDTO) 
 		}
 
 		if req.HasShuffle && d.HasShuffle {
-			logger.Debug("random answer list")
 			rand.Shuffle(len(answer.List), func(i, j int) { answer.List[i], answer.List[j] = answer.List[j], answer.List[i] })
 		}
 		d.Answers = answer.List
@@ -95,19 +93,13 @@ func (s *QuestionService) GetById(ctx context.Context, req *models.GetQuestionDT
 
 func (s *QuestionService) Create(ctx context.Context, dto *models.QuestionDTO) (string, error) {
 	dto.ID = uuid.NewString()
-	// if dto.Image.Filename != "" {
-	// 	dto.ImageLink = fmt.Sprintf("media/%s/%s/%s", dto.QuizID, dto.ID, dto.Image.Filename)
-	// 	if err := s.media.SaveFile(dto.Image, dto.ImageLink); err != nil {
-	// 		return "", err
-	// 	}
-	// 	dto.Image = nil
-	// }
-
-	dst := strings.Replace(dto.Image, "temp", dto.ID, 1)
-	if err := s.media.Move(dto.Image, dst); err != nil {
-		return dto.ID, err
+	if dto.Image != "" {
+		dst := strings.Replace(dto.Image, "temp", dto.ID, 1)
+		if err := s.media.Move(dto.Image, dst); err != nil {
+			return dto.ID, err
+		}
+		dto.Image = dst
 	}
-	dto.Image = dst
 
 	id, err := s.repo.Create(ctx, dto)
 	if err != nil {
@@ -125,20 +117,6 @@ func (s *QuestionService) Create(ctx context.Context, dto *models.QuestionDTO) (
 }
 
 func (s *QuestionService) Update(ctx context.Context, dto *models.QuestionDTO) error {
-	// if dto.ImageLink == "" {
-	// 	if err := s.media.Delete(fmt.Sprintf("media/%s/%s", dto.QuizID, dto.ID)); err != nil {
-	// 		return err
-	// 	}
-	// }
-
-	// if dto.Image.Filename != "" {
-	// 	dto.ImageLink = fmt.Sprintf("media/%s/%s/%s", dto.QuizID, dto.ID, dto.Image.Filename)
-	// 	if err := s.media.SaveFile(dto.Image, dto.ImageLink); err != nil {
-	// 		return err
-	// 	}
-	// 	dto.Image = nil
-	// }
-
 	if err := s.repo.Update(ctx, dto); err != nil {
 		return fmt.Errorf("failed to update question. error: %w", err)
 	}

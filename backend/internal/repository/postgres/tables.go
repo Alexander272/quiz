@@ -9,4 +9,5 @@ const (
 	QuestionTable = "question"
 	AnswerTable   = "answer"
 	ResultTable   = "result"
+	ScheduleTable = "schedule"
 )

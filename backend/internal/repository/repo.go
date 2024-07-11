@@ -24,6 +24,9 @@ type Question interface {
 type Answer interface {
 	postgres.Answer
 }
+type Schedule interface {
+	postgres.Schedule
+}
 
 type Repository struct {
 	Role
@@ -33,6 +36,7 @@ type Repository struct {
 	Quiz
 	Question
 	Answer
+	Schedule
 }
 
 func NewRepository(db *sqlx.DB) *Repository {
@@ -44,5 +48,6 @@ func NewRepository(db *sqlx.DB) *Repository {
 		Quiz:     postgres.NewQuizRepo(db),
 		Question: postgres.NewQuestionRepo(db),
 		Answer:   postgres.NewAnswerRepo(db),
+		Schedule: postgres.NewScheduleRepo(db),
 	}
 }

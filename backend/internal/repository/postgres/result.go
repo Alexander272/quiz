@@ -68,3 +68,11 @@ func (r *ResultRepo) Get(ctx context.Context, req *models.GetResults) ([]*models
 
 	return results, nil
 }
+
+func (r *ResultRepo) Create(ctx context.Context) error {
+	return fmt.Errorf("not implemented")
+}
+
+func (r *ResultRepo) Update(ctx context.Context) error {
+	return fmt.Errorf("not implemented")
+}

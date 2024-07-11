@@ -18,6 +18,7 @@ type Services struct {
 	Quiz
 	Question
 	Answer
+	Schedule
 }
 
 type Deps struct {
@@ -41,6 +42,7 @@ func NewServices(deps Deps) *Services {
 	answer := NewAnswerService(deps.Repos.Answer)
 	question := NewQuestionService(deps.Repos.Question, answer, media)
 	quiz := NewQuizService(deps.Repos.Quiz, media)
+	schedule := NewScheduleService(deps.Repos.Schedule)
 
 	return &Services{
 		MenuItem:   menuItem,
@@ -53,5 +55,6 @@ func NewServices(deps Deps) *Services {
 		Quiz:     quiz,
 		Question: question,
 		Answer:   answer,
+		Schedule: schedule,
 	}
 }

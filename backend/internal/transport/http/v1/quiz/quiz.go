@@ -100,7 +100,7 @@ func (h *Handler) create(c *gin.Context) {
 		response.NewErrorResponse(c, http.StatusBadRequest, err.Error(), "Отправлены некорректные данные")
 		return
 	}
-	logger.Debug("create quiz", logger.AnyAttr("dto", *dto))
+	// logger.Debug("create quiz", logger.AnyAttr("dto", *dto))
 
 	u, exists := c.Get(constants.CtxUser)
 	if !exists {

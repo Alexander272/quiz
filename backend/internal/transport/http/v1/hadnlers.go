@@ -9,6 +9,7 @@ import (
 	"github.com/Alexander272/quiz/backend/internal/transport/http/v1/media"
 	"github.com/Alexander272/quiz/backend/internal/transport/http/v1/question"
 	"github.com/Alexander272/quiz/backend/internal/transport/http/v1/quiz"
+	"github.com/Alexander272/quiz/backend/internal/transport/http/v1/schedule"
 	"github.com/gin-gonic/gin"
 )
 
@@ -45,4 +46,5 @@ func Register(api *gin.RouterGroup, deps *Deps) {
 	question.Register(v1, deps.Services.Question, deps.Middleware)
 	answer.Register(v1, deps.Services.Answer, deps.Middleware)
 	media.Register(v1, deps.Services.Media, deps.Middleware)
+	schedule.Register(v1, deps.Services.Schedule, deps.Middleware)
 }
