@@ -10,4 +10,5 @@ const (
 	AnswerTable   = "answer"
 	ResultTable   = "result"
 	ScheduleTable = "schedule"
+	AttemptTable  = "attempt"
 )
