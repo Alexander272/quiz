@@ -9,5 +9,6 @@ export const API = Object.freeze({
 		My: 'quizzes/my',
 	},
 	Question: 'questions',
+	Attempt: 'attempts',
 	Media: 'media',
 })

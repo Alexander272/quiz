@@ -1,5 +1,6 @@
 export interface IQuiz {
 	id: string
+	scheduleId: string
 	title: string
 	description: string
 	image?: string
