@@ -5,6 +5,7 @@ CREATE TABLE IF NOT EXISTS public.attempt
     id uuid NOT NULL,
     schedule_id uuid NOT NULL,
     user_id uuid NOT NULL,
+    username text COLLATE pg_catalog."default" DEFAULT ''::text,
     start_time integer DEFAULT 0,
     end_time integer DEFAULT 0,
     correct integer DEFAULT 0,

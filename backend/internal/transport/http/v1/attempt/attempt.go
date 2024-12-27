@@ -2,11 +2,15 @@ package attempt
 
 import (
 	"net/http"
+	"strings"
+	"time"
 
+	"github.com/Alexander272/quiz/backend/internal/constants"
 	"github.com/Alexander272/quiz/backend/internal/models"
 	"github.com/Alexander272/quiz/backend/internal/models/response"
 	"github.com/Alexander272/quiz/backend/internal/services"
 	"github.com/Alexander272/quiz/backend/internal/transport/http/middleware"
+	"github.com/Alexander272/quiz/backend/internal/transport/http/v1/attempt/details"
 	"github.com/Alexander272/quiz/backend/pkg/error_bot"
 	"github.com/Alexander272/quiz/backend/pkg/logger"
 	"github.com/gin-gonic/gin"
@@ -22,29 +26,36 @@ func NewHandler(service services.Attempt) *Handler {
 	}
 }
 
-func Register(api *gin.RouterGroup, service services.Attempt, middleware *middleware.Middleware) {
-	handler := NewHandler(service)
+func Register(api *gin.RouterGroup, services *services.Services, middleware *middleware.Middleware) {
+	handler := NewHandler(services.Attempt)
 
 	attempts := api.Group("/attempts", middleware.VerifyToken)
 	{
 		attempts.GET("", handler.get)
 		attempts.GET("/:id", handler.getByID)
+		// attempts.GET("/quiz/:quiz")
 		attempts.POST("", handler.create)
 		attempts.PUT("/:id", handler.update)
 		attempts.DELETE("/:id", handler.delete)
 	}
+
+	details.Register(attempts, services.AttemptDetails, middleware)
 }
 
 func (h *Handler) get(c *gin.Context) {
-	userID := c.Query("user")
+	quiz := c.Query("quiz")
 	scheduleID := c.Query("schedule")
-	if userID == "" && scheduleID == "" {
+	if quiz == "" && scheduleID == "" {
 		response.NewErrorResponse(c, http.StatusBadRequest, "empty param", "id не задан")
 		return
 	}
 
+	if quiz != "" {
+		h.getByQuiz(c)
+		return
+	}
+
 	req := &models.GetAttempt{
-		UserID:     userID,
 		ScheduleID: scheduleID,
 	}
 	data, err := h.service.Get(c, req)
@@ -53,6 +64,40 @@ func (h *Handler) get(c *gin.Context) {
 		error_bot.Send(c, err.Error(), req)
 		return
 	}
+	c.JSON(http.StatusOK, response.DataResponse{Data: data, Total: len(data)})
+}
+
+func (h *Handler) getByQuiz(c *gin.Context) {
+	quizID := c.Query("quiz")
+	active := c.Query("active")
+
+	u, exists := c.Get(constants.CtxUser)
+	if !exists {
+		response.NewErrorResponse(c, http.StatusUnauthorized, "empty user", "сессия не найдена")
+		return
+	}
+	user := u.(models.User)
+
+	req := &models.GetAttemptByQuiz{
+		QuizID: quizID,
+		UserID: user.ID,
+		Time:   time.Now().Unix(),
+	}
+	data, err := h.service.GetByQuiz(c, req)
+	if err != nil {
+		response.NewErrorResponse(c, http.StatusInternalServerError, err.Error(), "Произошла ошибка: "+err.Error())
+		error_bot.Send(c, err.Error(), req)
+		return
+	}
+
+	if active == "true" && len(data) > 0 {
+		if data[0].EndTime == 0 {
+			data = []*models.Attempt{data[0]}
+		} else {
+			data = []*models.Attempt{}
+		}
+	}
+
 	c.JSON(http.StatusOK, response.DataResponse{Data: data, Total: len(data)})
 }
 
@@ -79,7 +124,16 @@ func (h *Handler) create(c *gin.Context) {
 		response.NewErrorResponse(c, http.StatusBadRequest, err.Error(), "Отправлены некорректные данные")
 		return
 	}
-	// dto.StartTime = time.Now().Unix()
+
+	dto.Token = strings.Replace(c.GetHeader("Authorization"), "Bearer ", "", 1)
+
+	u, exists := c.Get(constants.CtxUser)
+	if !exists {
+		response.NewErrorResponse(c, http.StatusUnauthorized, "empty user", "сессия не найдена")
+		return
+	}
+	user := u.(models.User)
+	dto.UserID = user.ID
 
 	id, err := h.service.Create(c, dto)
 	if err != nil {
@@ -105,6 +159,14 @@ func (h *Handler) update(c *gin.Context) {
 		return
 	}
 	dto.ID = id
+
+	u, exists := c.Get(constants.CtxUser)
+	if !exists {
+		response.NewErrorResponse(c, http.StatusUnauthorized, "empty user", "сессия не найдена")
+		return
+	}
+	user := u.(models.User)
+	dto.UserID = user.ID
 
 	if err := h.service.Update(c, dto); err != nil {
 		response.NewErrorResponse(c, http.StatusInternalServerError, err.Error(), "Произошла ошибка: "+err.Error())

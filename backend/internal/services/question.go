@@ -18,11 +18,17 @@ type QuestionService struct {
 	media  Media
 }
 
-func NewQuestionService(repo repository.Question, answer Answer, media Media) *QuestionService {
+type QuestionDeps struct {
+	Repo   repository.Question
+	Answer Answer
+	Media  Media
+}
+
+func NewQuestionService(deps *QuestionDeps) *QuestionService {
 	return &QuestionService{
-		repo:   repo,
-		answer: answer,
-		media:  media,
+		repo:   deps.Repo,
+		answer: deps.Answer,
+		media:  deps.Media,
 	}
 }
 

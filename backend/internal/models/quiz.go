@@ -7,6 +7,7 @@ import (
 
 type Quiz struct {
 	ID               string        `json:"id" db:"id"`
+	ScheduleID       string        `json:"scheduleId" db:"schedule_id"`
 	Title            string        `json:"title" db:"title"`
 	Description      string        `json:"description" db:"description"`
 	Image            string        `json:"image,omitempty" db:"image"`

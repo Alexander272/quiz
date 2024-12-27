@@ -1,14 +1,15 @@
 package postgres
 
 const (
-	RoleTable     = "roles"
-	MenuItemTable = "menu_item"
-	MenuTable     = "menu"
+	RoleTable     = "public.roles"
+	MenuItemTable = "public.menu_item"
+	MenuTable     = "public.menu"
 
-	QuizTable     = "quiz"
-	QuestionTable = "question"
-	AnswerTable   = "answer"
-	ResultTable   = "result"
-	ScheduleTable = "schedule"
-	AttemptTable  = "attempt"
+	QuizTable           = "public.quiz"
+	QuestionTable       = "public.question"
+	AnswerTable         = "public.answer"
+	ResultTable         = "public.result"
+	ScheduleTable       = "public.schedule"
+	AttemptTable        = "public.attempt"
+	AttemptDetailsTable = "public.attempt_details"
 )

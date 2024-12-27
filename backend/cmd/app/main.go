@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/Alexander272/quiz/backend/internal/config"
+	"github.com/Alexander272/quiz/backend/internal/migrate"
 	"github.com/Alexander272/quiz/backend/internal/repository"
 	"github.com/Alexander272/quiz/backend/internal/server"
 	"github.com/Alexander272/quiz/backend/internal/services"
@@ -45,6 +46,10 @@ func main() {
 	})
 	if err != nil {
 		log.Fatalf("failed to initialize db: %s", err.Error())
+	}
+
+	if err := migrate.Migrate(db.DB); err != nil {
+		log.Fatalf("failed to migrate: %s", err.Error())
 	}
 
 	keycloak := auth.NewKeycloakClient(auth.Deps{

@@ -3,7 +3,6 @@ package postgres
 import (
 	"context"
 	"fmt"
-	"strings"
 
 	"github.com/Alexander272/quiz/backend/internal/models"
 	"github.com/google/uuid"
@@ -87,7 +86,7 @@ func (r *AnswerRepo) Create(ctx context.Context, dto *models.AnswerDTO) (string,
 		:image, :is_correct)`,
 		AnswerTable,
 	)
-	dto.ID = uuid.New().String()
+	dto.ID = uuid.NewString()
 
 	if _, err := r.db.NamedExecContext(ctx, query, dto); err != nil {
 		return "", fmt.Errorf("failed to execute query. error: %w", err)
@@ -96,17 +95,15 @@ func (r *AnswerRepo) Create(ctx context.Context, dto *models.AnswerDTO) (string,
 }
 
 func (r *AnswerRepo) CreateSeveral(ctx context.Context, dto []*models.AnswerDTO) error {
-	values := []string{}
-	args := []interface{}{}
-	c := 6
-	for i, v := range dto {
-		id := uuid.New()
-		args = append(args, id, v.QuestionID, v.Number, v.Text, v.Image, v.IsCorrect)
-		values = append(values, fmt.Sprintf("($%d, $%d, $%d, $%d, $%d, $%d)", c*i+1, c*i+2, c*i+3, c*i+4, c*i+5, c*i+6))
+	query := fmt.Sprintf(`INSERT INTO %s (id, question_id, number, text, image, is_correct) VALUES (:id, :question_id, :number, :text,
+		:image, :is_correct)`,
+		AnswerTable,
+	)
+	for _, v := range dto {
+		v.ID = uuid.NewString()
 	}
-	query := fmt.Sprintf(`INSERT INTO %s (id, question_id, number, text, image, is_correct) VALUES %s`, AnswerTable, strings.Join(values, ","))
 
-	if _, err := r.db.ExecContext(ctx, query, args...); err != nil {
+	if _, err := r.db.NamedExecContext(ctx, query, dto); err != nil {
 		return fmt.Errorf("failed to execute query. error: %w", err)
 	}
 	return nil

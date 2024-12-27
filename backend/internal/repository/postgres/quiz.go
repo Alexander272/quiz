@@ -31,9 +31,9 @@ type Quiz interface {
 }
 
 func (r *QuizRepo) Get(ctx context.Context, req *models.GetQuizzesDTO) ([]*models.Quiz, error) {
-	query := fmt.Sprintf(`SELECT id, title, description, image, number_of_attempts, category_id, start_time, end_time, time, author_id
-		FROM %s WHERE is_drawing=false AND end_time<=$1`,
-		QuizTable,
+	query := fmt.Sprintf(`SELECT q.id, title, description, image, number_of_attempts, category_id, time, author_id, s.id AS schedule_id
+		FROM %s AS q INNER JOIN %s AS s ON q.id=s.quiz_id WHERE s.start_time<=$1 AND s.end_time>=$1`,
+		QuizTable, ScheduleTable,
 	)
 
 	data := []*models.Quiz{}
@@ -57,9 +57,13 @@ func (r *QuizRepo) GetByAuthor(ctx context.Context, authorId string) ([]*models.
 }
 
 func (r *QuizRepo) GetById(ctx context.Context, req *models.GetQuizDTO) (*models.Quiz, error) {
-	query := fmt.Sprintf(`SELECT id, title, description, image, is_drawing, number_of_attempts, category_id, start_time, end_time, has_shuffle, has_skippable,
-		show_list, show_answers, show_results, time, author_id FROM %s WHERE id=$1`,
-		QuizTable,
+	query := fmt.Sprintf(`SELECT q.id, title, description, image, is_drawing, category_id, has_shuffle, has_skippable, show_list, show_answers, 
+		show_results, time, author_id,
+		COALESCE(s.id::text,'') AS schedule_id, COALESCE(s.start_time,0) AS start_time, 
+		COALESCE(s.end_time,0) AS end_time, COALESCE(s.number_of_attempts,0) AS  number_of_attempts
+		FROM %s AS q LEFT JOIN %s AS s ON q.id=s.quiz_id
+		WHERE q.id=$1`,
+		QuizTable, ScheduleTable,
 	)
 
 	quiz := &models.Quiz{}

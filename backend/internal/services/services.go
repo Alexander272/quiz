@@ -20,6 +20,7 @@ type Services struct {
 	Answer
 	Schedule
 	Attempt
+	AttemptDetails
 }
 
 type Deps struct {
@@ -41,10 +42,15 @@ func NewServices(deps Deps) *Services {
 
 	media := NewMediaService()
 	answer := NewAnswerService(deps.Repos.Answer)
-	question := NewQuestionService(deps.Repos.Question, answer, media)
+	question := NewQuestionService(&QuestionDeps{Repo: deps.Repos.Question, Answer: answer, Media: media})
 	quiz := NewQuizService(deps.Repos.Quiz, media)
 	schedule := NewScheduleService(deps.Repos.Schedule)
-	attempt := NewAttemptService(deps.Repos.Attempt)
+	attemptDetails := NewAttemptDetailsService(deps.Repos.AttemptDetails)
+	attempt := NewAttemptService(&AttemptDeps{
+		Repo:     deps.Repos.Attempt,
+		Details:  attemptDetails,
+		Keycloak: deps.Keycloak,
+	})
 
 	return &Services{
 		MenuItem:   menuItem,
@@ -53,11 +59,12 @@ func NewServices(deps Deps) *Services {
 		Session:    session,
 		Permission: permission,
 
-		Media:    media,
-		Quiz:     quiz,
-		Question: question,
-		Answer:   answer,
-		Schedule: schedule,
-		Attempt:  attempt,
+		Media:          media,
+		Quiz:           quiz,
+		Question:       question,
+		Answer:         answer,
+		Schedule:       schedule,
+		Attempt:        attempt,
+		AttemptDetails: attemptDetails,
 	}
 }

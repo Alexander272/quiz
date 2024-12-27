@@ -30,6 +30,9 @@ type Schedule interface {
 type Attempt interface {
 	postgres.Attempt
 }
+type AttemptDetails interface {
+	postgres.AttemptDetails
+}
 
 type Repository struct {
 	Role
@@ -41,6 +44,7 @@ type Repository struct {
 	Answer
 	Schedule
 	Attempt
+	AttemptDetails
 }
 
 func NewRepository(db *sqlx.DB) *Repository {
@@ -49,10 +53,11 @@ func NewRepository(db *sqlx.DB) *Repository {
 		MenuItem: postgres.NewMenuItemRepo(db),
 		Menu:     postgres.NewMenuRepo(db),
 
-		Quiz:     postgres.NewQuizRepo(db),
-		Question: postgres.NewQuestionRepo(db),
-		Answer:   postgres.NewAnswerRepo(db),
-		Schedule: postgres.NewScheduleRepo(db),
-		Attempt:  postgres.NewAttemptRepo(db),
+		Quiz:           postgres.NewQuizRepo(db),
+		Question:       postgres.NewQuestionRepo(db),
+		Answer:         postgres.NewAnswerRepo(db),
+		Schedule:       postgres.NewScheduleRepo(db),
+		Attempt:        postgres.NewAttemptRepo(db),
+		AttemptDetails: postgres.NewAttemptDetailsRepo(db),
 	}
 }

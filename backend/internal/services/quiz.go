@@ -31,6 +31,7 @@ type Quiz interface {
 	Delete(context.Context, *models.DeleteQuizDTO) error
 }
 
+// Deprecated
 func (s *QuizService) Check(ctx context.Context, dto *models.UserQuiz) (*models.UserResult, error) {
 
 	return nil, fmt.Errorf("not implemented")

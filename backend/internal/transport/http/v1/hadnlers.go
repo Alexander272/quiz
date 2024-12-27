@@ -5,6 +5,7 @@ import (
 	"github.com/Alexander272/quiz/backend/internal/services"
 	"github.com/Alexander272/quiz/backend/internal/transport/http/middleware"
 	"github.com/Alexander272/quiz/backend/internal/transport/http/v1/answer"
+	"github.com/Alexander272/quiz/backend/internal/transport/http/v1/attempt"
 	"github.com/Alexander272/quiz/backend/internal/transport/http/v1/auth"
 	"github.com/Alexander272/quiz/backend/internal/transport/http/v1/media"
 	"github.com/Alexander272/quiz/backend/internal/transport/http/v1/question"
@@ -47,4 +48,5 @@ func Register(api *gin.RouterGroup, deps *Deps) {
 	answer.Register(v1, deps.Services.Answer, deps.Middleware)
 	media.Register(v1, deps.Services.Media, deps.Middleware)
 	schedule.Register(v1, deps.Services.Schedule, deps.Middleware)
+	attempt.Register(v1, deps.Services, deps.Middleware)
 }
