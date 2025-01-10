@@ -10,5 +10,6 @@ export const API = Object.freeze({
 	},
 	Question: 'questions',
 	Attempt: 'attempts',
+	AttemptDetails: 'attempts/details',
 	Media: 'media',
 })

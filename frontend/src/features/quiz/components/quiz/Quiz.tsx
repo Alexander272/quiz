@@ -33,6 +33,8 @@ export const Quiz: FC<Props> = () => {
 			alignItems={'center'}
 			height={'100%'}
 		>
+			{/* //TODO надо попытку с сервера забирать и если есть незаконченная то показывать ее и предлагать продолжить, либо автоматом продолжать */}
+			{/* еще можно показывать список предыдущих попыток */}
 			{!attempt ? (
 				<StartScreen quiz={quiz?.data} questions={(questions?.data || []).length} onStart={startHandler} />
 			) : (
