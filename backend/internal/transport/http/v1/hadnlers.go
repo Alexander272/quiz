@@ -14,26 +14,6 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// type Handler struct {
-// 	services   *services.Services
-// 	conf       *config.Config
-// 	middleware *middleware.Middleware
-// }
-
-// func NewHandler(deps *Deps) *Handler {
-// 	return &Handler{
-// 		services:   deps.Services,
-// 		conf:       deps.Conf,
-// 		middleware: deps.Middleware,
-// 	}
-// }
-
-// func (h *Handler) Init(group *gin.RouterGroup) {
-// 	// v1 := group.Group("/v1")
-
-// 	// auth.Register(v1, auth.Deps{Service: h.services.Session, Auth: h.conf.Auth})
-// }
-
 type Deps struct {
 	Services   *services.Services
 	Conf       *config.Config

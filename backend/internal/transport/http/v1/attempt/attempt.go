@@ -124,6 +124,7 @@ func (h *Handler) create(c *gin.Context) {
 		response.NewErrorResponse(c, http.StatusBadRequest, err.Error(), "Отправлены некорректные данные")
 		return
 	}
+	//TODO на клиенте происходит авто сохранения => надо как-то обновлять (и понять что именно надо обновлять) сохраненные данные
 
 	dto.Token = strings.Replace(c.GetHeader("Authorization"), "Bearer ", "", 1)
 
