@@ -30,7 +30,7 @@ const config: RouteObject[] = [
 						element: <Home />,
 					},
 					{
-						path: AppRoutes.Home + '/:id',
+						path: AppRoutes.Quiz,
 						element: <Quiz />,
 					},
 					{

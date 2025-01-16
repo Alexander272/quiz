@@ -1,7 +1,7 @@
 import { Box } from '@mui/material'
 
 import { PageBox } from '@/styled/PageBox'
-import { QuizList } from '@/features/quiz/components/quiz/QuizList'
+import { QuizList } from '@/features/quiz/components/quiz/QuizList/QuizList'
 
 export default function Quizzes() {
 	return (

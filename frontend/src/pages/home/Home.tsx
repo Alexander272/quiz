@@ -1,6 +1,7 @@
 import { Box } from '@mui/material'
 
 import { PageBox } from '@/styled/PageBox'
+import { QuizList } from '@/features/quiz/components/quiz/QuizList/QuizList'
 
 export default function Home() {
 	return (
@@ -18,7 +19,9 @@ export default function Home() {
 				display={'flex'}
 				flexDirection={'column'}
 				sx={{ backgroundColor: '#fff', userSelect: 'none' }}
-			></Box>
+			>
+				<QuizList />
+			</Box>
 		</PageBox>
 	)
 }

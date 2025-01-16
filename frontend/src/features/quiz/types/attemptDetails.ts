@@ -16,7 +16,7 @@ export interface IGetAttemptDetailsDTO {
 }
 
 export interface IAttemptDetailDTO {
-	id: string
+	id?: string
 	attemptId: string
 	questionId: string
 	answers: string[]

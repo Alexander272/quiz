@@ -14,6 +14,7 @@ export const Quiz: FC<Props> = () => {
 	const { id } = useParams()
 	const [attempt, setAttempt] = useState('')
 
+	//TODO если попытка продолжается, то нужно получать ответы которые пользователь давал в прошлый раз
 	const { data: quiz, isFetching: isFetchQuiz } = useGetQuizByIdQuery(id || '', { skip: !id })
 	const { data: questions, isFetching: isFetchQuestion } = useGetQuestionsQuery(
 		{ quiz: id || '', answers: true },

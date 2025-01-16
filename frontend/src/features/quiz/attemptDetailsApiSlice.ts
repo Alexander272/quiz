@@ -25,7 +25,7 @@ export const attemptDetailsApiSlice = apiSlice.injectEndpoints({
 
 		createAttemptDetail: builder.mutation<{ data: IAttemptDetails }, IAttemptDetailDTO>({
 			query: data => ({
-				url: API.AttemptDetails,
+				url: API.Attempt.Details,
 				method: 'POST',
 				body: data,
 			}),
@@ -33,7 +33,7 @@ export const attemptDetailsApiSlice = apiSlice.injectEndpoints({
 
 		updateAttemptDetail: builder.mutation<{ data: IAttemptDetails }, IAttemptDetailDTO>({
 			query: data => ({
-				url: `${API.AttemptDetails}/${data.id}`,
+				url: `${API.Attempt.Details}/${data.id}`,
 				method: 'PUT',
 				body: data,
 			}),

@@ -1,7 +1,9 @@
 import { FC, useEffect, useState } from 'react'
 import { Button, Stack, Typography, useTheme } from '@mui/material'
 import { FormProvider, useForm } from 'react-hook-form'
+import { toast } from 'react-toastify'
 
+import type { IFetchError } from '@/app/types/error'
 import type { IQuestion } from '../../types/question'
 import type { IQuiz, IUserQuizForm } from '../../types/quiz'
 import { useDebounce } from '@/hooks/useDebounce'
@@ -10,6 +12,7 @@ import { LongArrowIcon } from '@/components/Icons/LongArrowIcon'
 import { FinishIcon } from '@/components/Icons/FinishIcon'
 import { QuestionList } from '../question/QuestionList'
 import { Question } from '../question/Question'
+import { useSaveAttemptMutation } from '../../attemptApiSlice'
 
 type Props = {
 	attemptId: string
@@ -24,29 +27,40 @@ export const Passing: FC<Props> = ({ attemptId, quiz, questions }) => {
 
 	const [curQuestion, setCurQuestion] = useState(0)
 
+	const [save] = useSaveAttemptMutation()
+
 	const autosave = useDebounce(() => {
 		saveHandler()
-	}, 30000)
+	}, 60000)
 
 	useEffect(() => {
 		if (methods.formState.dirtyFields) autosave()
 	}, [methods.formState.dirtyFields, autosave])
 
-	const saveHandler = methods.handleSubmit(form => {
+	const saveHandler = methods.handleSubmit(async form => {
 		console.log('quiz', form)
 
-		const questions = Object.keys(form).map(k => ({
-			id: k,
+		const newData = Object.keys(form).map(k => ({
+			attemptId: attemptId,
+			questionId: k,
 			answers: Object.keys(form[k].answers).filter(a => form[k].answers[a]),
 		}))
 
-		const newData = {
-			// quizId: quiz?.id,
-			attemptId: attemptId,
-			questions: questions,
-		}
+		// const newData = {
+		// 	// quizId: quiz?.id,
+		// 	attemptId: attemptId,
+		// 	questions: questions,
+		// }
 		console.log('newData', newData)
 		console.log('dirty', methods.formState.dirtyFields)
+
+		try {
+			await save(newData).unwrap()
+		} catch (error) {
+			const fetchError = error as IFetchError
+			toast.error(fetchError.data.message, { autoClose: false })
+			console.log(error)
+		}
 	})
 
 	const selectHandler = (index: number) => {

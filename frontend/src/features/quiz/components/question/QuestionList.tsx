@@ -1,9 +1,10 @@
 import { FC } from 'react'
-import { IQuestion } from '../../types/question'
 import { Stack, Typography } from '@mui/material'
-import { ShortDivider } from '@/components/Divider/ShortDivider'
 import { useFormContext } from 'react-hook-form'
-import { IUserQuizForm } from '../../types/quiz'
+
+import type { IUserQuizForm } from '../../types/quiz'
+import type { IQuestion } from '../../types/question'
+import { ShortDivider } from '@/components/Divider/ShortDivider'
 
 type Props = {
 	data: IQuestion[]
