@@ -31,7 +31,7 @@ type Quiz interface {
 }
 
 func (r *QuizRepo) Get(ctx context.Context, req *models.GetQuizzesDTO) ([]*models.Quiz, error) {
-	query := fmt.Sprintf(`SELECT q.id, title, description, image, number_of_attempts, category_id, time, author_id, s.id AS schedule_id
+	query := fmt.Sprintf(`SELECT q.id, title, description, image, s.number_of_attempts, category_id, time, author_id, s.id AS schedule_id
 		FROM %s AS q INNER JOIN %s AS s ON q.id=s.quiz_id WHERE s.start_time<=$1 AND s.end_time>=$1`,
 		QuizTable, ScheduleTable,
 	)

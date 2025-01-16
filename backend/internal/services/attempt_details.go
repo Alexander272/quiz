@@ -22,7 +22,9 @@ type AttemptDetails interface {
 	Get(ctx context.Context, req *models.GetAttemptDetails) (*models.AttemptDetails, error)
 	CreateAll(ctx context.Context, dto *models.CreateAttemptDetailsDTO) error
 	Create(ctx context.Context, dto *models.AttemptDetailDTO) error
+	CreateSeveral(ctx context.Context, dto []*models.AttemptDetailDTO) error
 	Update(ctx context.Context, dto *models.AttemptDetailDTO) error
+	UpdateSeveral(ctx context.Context, dto []*models.AttemptDetailDTO) error
 }
 
 func (s *AttemptDetailsService) Get(ctx context.Context, req *models.GetAttemptDetails) (*models.AttemptDetails, error) {
@@ -47,9 +49,29 @@ func (s *AttemptDetailsService) Create(ctx context.Context, dto *models.AttemptD
 	return nil
 }
 
+func (s *AttemptDetailsService) CreateSeveral(ctx context.Context, dto []*models.AttemptDetailDTO) error {
+	if len(dto) == 0 {
+		return nil
+	}
+	if err := s.repo.CreateSeveral(ctx, dto); err != nil {
+		return fmt.Errorf("failed to create several attempt details. error: %w", err)
+	}
+	return nil
+}
+
 func (s *AttemptDetailsService) Update(ctx context.Context, dto *models.AttemptDetailDTO) error {
 	if err := s.repo.Update(ctx, dto); err != nil {
 		return fmt.Errorf("failed to update attempt detail. error: %w", err)
+	}
+	return nil
+}
+
+func (s *AttemptDetailsService) UpdateSeveral(ctx context.Context, dto []*models.AttemptDetailDTO) error {
+	if len(dto) == 0 {
+		return nil
+	}
+	if err := s.repo.UpdateSeveral(ctx, dto); err != nil {
+		return fmt.Errorf("failed to update several attempt details. error: %w", err)
 	}
 	return nil
 }

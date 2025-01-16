@@ -10,6 +10,7 @@
 /build
 */ssl
 /backend/files
+/backend/media
 
 # Logs
 logs

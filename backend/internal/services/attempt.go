@@ -31,6 +31,7 @@ func NewAttemptService(deps *AttemptDeps) *AttemptService {
 }
 
 type Attempt interface {
+	SaveDetails(context.Context, []*models.AttemptDetailDTO) error
 	Finish(context.Context, *models.FinishAttempt) (*models.Attempt, error)
 	Get(context.Context, *models.GetAttempt) ([]*models.Attempt, error)
 	GetByQuiz(context.Context, *models.GetAttemptByQuiz) ([]*models.Attempt, error)
@@ -38,6 +39,28 @@ type Attempt interface {
 	Create(context.Context, *models.AttemptDTO) (string, error)
 	Update(context.Context, *models.AttemptDTO) error
 	Delete(context.Context, *models.DeleteAttemptDTO) error
+}
+
+func (s *AttemptService) SaveDetails(ctx context.Context, dto []*models.AttemptDetailDTO) error {
+	updated := []*models.AttemptDetailDTO{}
+	new := []*models.AttemptDetailDTO{}
+
+	//TODO если я не передам id с клиента он создаст новую запись, что и логично, но это проблема
+	for _, d := range dto {
+		if d.ID == "" {
+			new = append(new, d)
+		} else {
+			updated = append(updated, d)
+		}
+	}
+
+	if err := s.details.UpdateSeveral(ctx, updated); err != nil {
+		return err
+	}
+	if err := s.details.CreateSeveral(ctx, new); err != nil {
+		return err
+	}
+	return nil
 }
 
 func (s *AttemptService) Finish(ctx context.Context, dto *models.FinishAttempt) (*models.Attempt, error) {

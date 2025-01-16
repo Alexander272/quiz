@@ -34,6 +34,8 @@ func Register(api *gin.RouterGroup, services *services.Services, middleware *mid
 		attempts.GET("", handler.get)
 		attempts.GET("/:id", handler.getByID)
 		// attempts.GET("/quiz/:quiz")
+		attempts.POST("/save", handler.saveDetails)
+		attempts.POST("/finish", handler.finish)
 		attempts.POST("", handler.create)
 		attempts.PUT("/:id", handler.update)
 		attempts.DELETE("/:id", handler.delete)
@@ -118,6 +120,38 @@ func (h *Handler) getByID(c *gin.Context) {
 	c.JSON(http.StatusOK, response.DataResponse{Data: data})
 }
 
+func (h *Handler) saveDetails(c *gin.Context) {
+	dto := []*models.AttemptDetailDTO{}
+	if err := c.BindJSON(&dto); err != nil {
+		response.NewErrorResponse(c, http.StatusBadRequest, err.Error(), "Отправлены некорректные данные")
+		return
+	}
+
+	if err := h.service.SaveDetails(c, dto); err != nil {
+		response.NewErrorResponse(c, http.StatusInternalServerError, err.Error(), "Произошла ошибка: "+err.Error())
+		error_bot.Send(c, err.Error(), dto)
+		return
+	}
+	c.JSON(http.StatusOK, response.IdResponse{})
+}
+
+func (h *Handler) finish(c *gin.Context) {
+	dto := &models.FinishAttempt{}
+	if err := c.BindJSON(&dto); err != nil {
+		response.NewErrorResponse(c, http.StatusBadRequest, err.Error(), "Отправлены некорректные данные")
+		return
+	}
+
+	data, err := h.service.Finish(c, dto)
+	if err != nil {
+		response.NewErrorResponse(c, http.StatusInternalServerError, err.Error(), "Произошла ошибка: "+err.Error())
+		error_bot.Send(c, err.Error(), dto)
+		return
+	}
+
+	c.JSON(http.StatusOK, response.DataResponse{Data: data})
+}
+
 func (h *Handler) create(c *gin.Context) {
 	dto := &models.AttemptDTO{}
 	if err := c.BindJSON(dto); err != nil {
@@ -125,6 +159,7 @@ func (h *Handler) create(c *gin.Context) {
 		return
 	}
 	//TODO на клиенте происходит авто сохранения => надо как-то обновлять (и понять что именно надо обновлять) сохраненные данные
+	// все же просто, записи в который есть id нужно обновить, остальные нужно создать
 
 	dto.Token = strings.Replace(c.GetHeader("Authorization"), "Bearer ", "", 1)
 

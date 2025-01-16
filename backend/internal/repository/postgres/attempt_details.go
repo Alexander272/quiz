@@ -3,6 +3,7 @@ package postgres
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/Alexander272/quiz/backend/internal/models"
 	"github.com/Alexander272/quiz/backend/internal/repository/postgres/pq_models"
@@ -26,7 +27,9 @@ type AttemptDetails interface {
 	Get(ctx context.Context, req *models.GetAttemptDetails) (*models.AttemptDetails, error)
 	CreateAll(ctx context.Context, dto *models.CreateAttemptDetailsDTO) error
 	Create(ctx context.Context, dto *models.AttemptDetailDTO) error
+	CreateSeveral(ctx context.Context, dto []*models.AttemptDetailDTO) error
 	Update(ctx context.Context, dto *models.AttemptDetailDTO) error
+	UpdateSeveral(ctx context.Context, dto []*models.AttemptDetailDTO) error
 }
 
 func (r *AttemptDetailsRepo) Get(ctx context.Context, req *models.GetAttemptDetails) (*models.AttemptDetails, error) {
@@ -99,8 +102,36 @@ func (r *AttemptDetailsRepo) Create(ctx context.Context, dto *models.AttemptDeta
 		AttemptDetailsTable,
 	)
 	dto.ID = uuid.NewString()
+	tmp := &pq_models.AttemptDetailsDTO{
+		ID:         dto.ID,
+		AttemptID:  dto.AttemptID,
+		QuestionID: dto.QuestionID,
+		Answers:    pq.StringArray(dto.Answers),
+	}
 
-	if _, err := r.db.NamedExecContext(ctx, query, dto); err != nil {
+	if _, err := r.db.NamedExecContext(ctx, query, tmp); err != nil {
+		return fmt.Errorf("failed to execute query. error: %w", err)
+	}
+	return nil
+}
+
+func (r *AttemptDetailsRepo) CreateSeveral(ctx context.Context, dto []*models.AttemptDetailDTO) error {
+	query := fmt.Sprintf(`INSERT INTO %s (id, attempt_id, question_id, answers) 
+		VALUES (:id, :attempt_id, :question_id, :answers)`,
+		AttemptDetailsTable,
+	)
+	tmp := []*pq_models.AttemptDetailsDTO{}
+	for _, v := range dto {
+		v.ID = uuid.NewString()
+		tmp = append(tmp, &pq_models.AttemptDetailsDTO{
+			ID:         v.ID,
+			AttemptID:  v.AttemptID,
+			QuestionID: v.QuestionID,
+			Answers:    pq.StringArray(v.Answers),
+		})
+	}
+
+	if _, err := r.db.NamedExecContext(ctx, query, tmp); err != nil {
 		return fmt.Errorf("failed to execute query. error: %w", err)
 	}
 	return nil
@@ -114,3 +145,30 @@ func (r *AttemptDetailsRepo) Update(ctx context.Context, dto *models.AttemptDeta
 	}
 	return nil
 }
+
+func (r *AttemptDetailsRepo) UpdateSeveral(ctx context.Context, dto []*models.AttemptDetailDTO) error {
+	values := []string{}
+	args := []interface{}{}
+	for i, v := range dto {
+		tmp := []interface{}{v.ID, pq.Array(v.Answers)}
+		args = append(args, tmp...)
+		numbers := []string{}
+		for j := range tmp {
+			numbers = append(numbers, fmt.Sprintf("$%d", i*len(tmp)+j+1))
+		}
+		values = append(values, fmt.Sprintf("($%s)", strings.Join(numbers, ",")))
+	}
+
+	query := fmt.Sprintf(`UPDATE %s AS t SET answers=s.answers FROM (VALUES %s) AS s(id, answers) WHERE t.id=s.id::uuid`,
+		AttemptDetailsTable, strings.Join(values, ","),
+	)
+
+	if _, err := r.db.ExecContext(ctx, query, args...); err != nil {
+		return fmt.Errorf("failed to execute query. error: %w", err)
+	}
+	return nil
+}
+
+// func (r *AttemptDetailsRepo) Save(ctx context.Context, dto []*models.AttemptDetailDTO) error{
+// 	queryUpdate := fmt.Sprintf(`UPDATE %s SET answers=:answers WHERE id=:id`, AttemptDetailsTable)
+// }
